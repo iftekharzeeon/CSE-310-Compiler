@@ -13,7 +13,6 @@ private:
 public:
     SymbolTable(int bucketSize) {
         currentScopeTable = new ScopeTable(bucketSize);
-        currentScopeTable->setId("1");
     }
 
     bool insert(string name, string type) {
@@ -26,8 +25,15 @@ public:
     }
 
     SymbolInfo* lookUp(string name) {
-
-        return currentScopeTable->lookUp(name);
+        while (currentScopeTable != nullptr) {
+            SymbolInfo *symbolInfo = currentScopeTable->lookUp(name);
+            if (symbolInfo == nullptr) {
+                currentScopeTable = currentScopeTable->getParentScope();
+            } else {
+                return symbolInfo;
+            }
+        }
+        return nullptr;
     }
 
     bool remove(string name) {

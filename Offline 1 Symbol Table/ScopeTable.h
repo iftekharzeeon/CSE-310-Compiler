@@ -26,6 +26,7 @@ public:
         this->bucketSize = bucketSize;
         scopeTable = new SymbolInfo[bucketSize];
         parentScope = nullptr;
+        scopeTableId = "1";
         numberOfChild = 0;
     }
 
@@ -79,11 +80,14 @@ public:
     SymbolInfo* lookUp(string name) {
         int hashValueIndex = hashFunction(const_cast<char *>(name.c_str()));
         SymbolInfo *symbolInfo = &scopeTable[hashValueIndex];
+        int counter = 0;
         while (symbolInfo != nullptr && !symbolInfo->getName().empty()) {
             if (symbolInfo->getName() == name) {
+                cout << "Found in ScopeTable# " << scopeTableId << " at position " << hashValueIndex << ", " << counter << endl;
                 return symbolInfo;
             }
             symbolInfo = symbolInfo->getNextObj();
+            counter++;
         }
         return nullptr;
     }

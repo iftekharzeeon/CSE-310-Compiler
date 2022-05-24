@@ -28,8 +28,6 @@ int main() {
             SymbolInfo *symbolInfo = symbolTable->lookUp(name);
             if (symbolInfo == nullptr) {
                 cout << "Not found" << endl;
-            } else {
-                cout << "Found" << endl;
             }
         } else if (input == "D") {
             //Delete name
