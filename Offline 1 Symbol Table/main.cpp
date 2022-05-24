@@ -36,8 +36,10 @@ int main() {
             //Print All or Current
             cin >> secondInput;
             if (secondInput == "A") {
+                //Print All
                 symbolTable->printAllScopeTable();
             } else if (secondInput == "C") {
+                //Print Current
                 symbolTable->printCurrentScopeTable();
             }
         } else if (input == "S") {

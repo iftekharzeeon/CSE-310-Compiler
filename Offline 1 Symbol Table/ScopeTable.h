@@ -93,6 +93,7 @@ public:
     }
 
     void print() {
+        cout << "ScopeTable# " << scopeTableId << endl;
         for (int i = 0; i < bucketSize; i++) {
             SymbolInfo *symbolInfo = &scopeTable[i];
             cout << i << " --> ";

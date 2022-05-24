@@ -16,7 +16,6 @@ public:
     }
 
     bool insert(string name, string type) {
-
         if (currentScopeTable->insert(const_cast<char *>(name.c_str()), type)) {
             return true;
         } else {
@@ -25,10 +24,11 @@ public:
     }
 
     SymbolInfo* lookUp(string name) {
-        while (currentScopeTable != nullptr) {
-            SymbolInfo *symbolInfo = currentScopeTable->lookUp(name);
+        ScopeTable *temp = currentScopeTable;
+        while (temp != nullptr) {
+            SymbolInfo *symbolInfo = temp->lookUp(name);
             if (symbolInfo == nullptr) {
-                currentScopeTable = currentScopeTable->getParentScope();
+                temp = temp->getParentScope();
             } else {
                 return symbolInfo;
             }
@@ -45,7 +45,13 @@ public:
     }
 
     void printAllScopeTable() {
-
+        ScopeTable *temp = currentScopeTable;
+        while (temp != nullptr) {
+            temp->print();
+            cout << endl;
+            cout << endl;
+            temp = temp->getParentScope();
+        }
     }
 
     void printCurrentScopeTable() {
