@@ -17,7 +17,7 @@ private:
     int bucketSize;
     SymbolInfo *scopeTable;
     ScopeTable* parentScope;
-    string id;
+    string scopeTableId;
     int numberOfChild;
 public:
 
@@ -26,15 +26,12 @@ public:
         this->bucketSize = bucketSize;
         scopeTable = new SymbolInfo[bucketSize];
         parentScope = nullptr;
-
-        cout << sizeof(scopeTable) << endl;
-
         numberOfChild = 0;
     }
 
-    unsigned long hashFunction(char *str, int bucketSize)
+    unsigned int hashFunction(char *str)
     {
-        unsigned long hash = 0;
+        unsigned int hash = 0;
         int c;
 
         while (c = *str++)
@@ -43,23 +40,17 @@ public:
         return (hash % bucketSize);
     }
 
-    string getId()
-    {
-        if (parentScope == nullptr) {
-            return "1";
-        } else {
-            string current_id = to_string(parentScope->getNumberOfChild()) + to_string(1);
-            return parentScope->id + "." + current_id;
-        }
+    string getId() {
+        return this->scopeTableId;
     }
 
     void setId(string _id)
     {
-        this->id = _id;
+        this->scopeTableId = _id;
     }
 
     bool insert(char *name, string type) {
-        int hashValueIndex = hashFunction(name, bucketSize);
+        int hashValueIndex = hashFunction(name);
         SymbolInfo *symbolInfo = lookUp(name);
 
         if (symbolInfo != nullptr) {
@@ -69,22 +60,24 @@ public:
             if (symbolInfo->getName() == "") {
                 symbolInfo->setName(name);
                 symbolInfo->setType(type);
-                cout << "Inserted into ScopeTable " << getId() << endl;
+                cout << "Inserted into ScopeTable# " << getId() << " at position " << hashValueIndex << ", 0" << endl;
             } else {
+                int counter = 1;
                 while (symbolInfo->getNextObj() != nullptr) {
                     symbolInfo = symbolInfo->getNextObj();
+                    counter++;
                 }
                 SymbolInfo *newSymbolInfo;
                 newSymbolInfo = new SymbolInfo(name, type);
                 symbolInfo->setNextObj(newSymbolInfo);
-                cout << "Inserted into ScopeTable " << getId() << endl;
+                cout << "Inserted into ScopeTable " << getId() << " at position " << hashValueIndex << ", " << counter << endl;
             }
             return true;
         }
     }
 
     SymbolInfo* lookUp(string name) {
-        int hashValueIndex = hashFunction(const_cast<char *>(name.c_str()), bucketSize);
+        int hashValueIndex = hashFunction(const_cast<char *>(name.c_str()));
         SymbolInfo *symbolInfo = &scopeTable[hashValueIndex];
         while (symbolInfo != nullptr && !symbolInfo->getName().empty()) {
             if (symbolInfo->getName() == name) {
@@ -108,6 +101,18 @@ public:
             }
             cout << endl;
         }
+    }
+
+    ScopeTable *getParentScope() {
+        return parentScope;
+    }
+
+    void setParentScope(ScopeTable *parentScope) {
+        this->parentScope = parentScope;
+    }
+
+    void increaseNumberOfChld() {
+        this->numberOfChild++;
     }
 
     int getNumberOfChild() {

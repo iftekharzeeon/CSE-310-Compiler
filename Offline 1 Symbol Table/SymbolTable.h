@@ -13,6 +13,7 @@ private:
 public:
     SymbolTable(int bucketSize) {
         currentScopeTable = new ScopeTable(bucketSize);
+        currentScopeTable->setId("1");
     }
 
     bool insert(string name, string type) {
@@ -38,23 +39,33 @@ public:
     }
 
     void printAllScopeTable() {
-        cout << "All scope tables coming up" << endl;
+
     }
 
     void printCurrentScopeTable() {
-        cout << "Current Scope table coming up" << endl;
         currentScopeTable->print();
     }
 
-    void enterNewScope() {
-        cout << "Entering into new Scope" << endl;
+    void enterNewScope(int bucketSize) {
+        ScopeTable *newScopeTable;
+        newScopeTable = new ScopeTable(bucketSize);
+        newScopeTable->setParentScope(currentScopeTable);
+        currentScopeTable->increaseNumberOfChld();
+        int numberOfChildOfCurrentScope = currentScopeTable->getNumberOfChild();
+        string nc = to_string(numberOfChildOfCurrentScope);
+        string parentId = currentScopeTable->getId();
+        string newId = parentId + "." + nc;
+        newScopeTable->setId(newId);
+        currentScopeTable = newScopeTable;
+
+        cout << "New ScopeTable with scopeTableId " << currentScopeTable->getId() + " created" << endl;
     }
 
     void exitCurrentScope() {
         cout << "Exit new scope" << endl;
     }
 
-    virtual ~SymbolTable() {
+    ~SymbolTable() {
 
     }
 };

@@ -26,7 +26,11 @@ int main() {
             //Lookup name
             cin >> name;
             SymbolInfo *symbolInfo = symbolTable->lookUp(name);
-            cout << symbolInfo->getName() << " found" << endl;
+            if (symbolInfo == nullptr) {
+                cout << "Not found" << endl;
+            } else {
+                cout << "Found" << endl;
+            }
         } else if (input == "D") {
             //Delete name
             symbolTable->remove(name);
@@ -40,7 +44,7 @@ int main() {
             }
         } else if (input == "S") {
             //EnterNewScope
-            symbolTable->enterNewScope();
+            symbolTable->enterNewScope(numberOfBucket);
         } else if (input == "E") {
             //ExitCurrentScope
             symbolTable->exitCurrentScope();
