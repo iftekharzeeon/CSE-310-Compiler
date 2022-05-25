@@ -10,9 +10,12 @@
 class SymbolTable {
 private:
     ScopeTable *currentScopeTable;
+    int rootScope;
 public:
     SymbolTable(int bucketSize) {
+        //Initial Scope
         currentScopeTable = new ScopeTable(bucketSize);
+        rootScope = 1;
     }
 
     bool insert(string name, string type) {
@@ -55,16 +58,25 @@ public:
     }
 
     void enterNewScope(int bucketSize) {
+        //Initialize a new scope
         ScopeTable *newScopeTable;
         newScopeTable = new ScopeTable(bucketSize);
-        newScopeTable->setParentScope(currentScopeTable);
-        currentScopeTable->increaseNumberOfChld();
-        int numberOfChildOfCurrentScope = currentScopeTable->getNumberOfChild();
-        string nc = to_string(numberOfChildOfCurrentScope);
-        string parentId = currentScopeTable->getId();
-        string newId = parentId + "." + nc;
-        newScopeTable->setId(newId);
-        currentScopeTable = newScopeTable;
+
+        if (currentScopeTable == nullptr) {
+            rootScope++;
+            string newId = to_string(rootScope);
+            newScopeTable->setId(newId);
+            currentScopeTable = newScopeTable;
+        } else {
+            newScopeTable->setParentScope(currentScopeTable);
+            currentScopeTable->increaseNumberOfChild();
+            int numberOfChildOfCurrentScope = currentScopeTable->getNumberOfChild();
+            string nc = to_string(numberOfChildOfCurrentScope);
+            string parentId = currentScopeTable->getId();
+            string newId = parentId + "." + nc;
+            newScopeTable->setId(newId);
+            currentScopeTable = newScopeTable;
+        }
 
         cout << "New ScopeTable with scopeTableId " << currentScopeTable->getId() + " created" << endl;
     }
@@ -76,7 +88,7 @@ public:
     }
 
     ~SymbolTable() {
-
+        delete currentScopeTable;
     }
 };
 

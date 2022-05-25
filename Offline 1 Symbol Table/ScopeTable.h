@@ -16,7 +16,7 @@ class ScopeTable {
 private:
     int bucketSize;
     SymbolInfo **scopeTable;
-    ScopeTable* parentScope;
+    ScopeTable *parentScope;
     string scopeTableId;
     int numberOfChild;
 public:
@@ -25,16 +25,18 @@ public:
     {
         this->bucketSize = bucketSize;
 
+        //Initialize Array of Pointers
         scopeTable = new SymbolInfo*[bucketSize];
         for (int i = 0; i < bucketSize; i++) {
-            SymbolInfo *symbolInfo = new SymbolInfo();
-            scopeTable[i] = symbolInfo;
+            scopeTable[i] = nullptr;
         }
+
         parentScope = nullptr;
         scopeTableId = "1";
         numberOfChild = 0;
     }
 
+    //for Windows OS it needs to be unsigned long, for linux it is unsigned int
     unsigned int hashFunction(char *str)
     {
         unsigned int hash = 0;
@@ -57,18 +59,22 @@ public:
 
     bool insert(char *name, string type) {
         int hashValueIndex = hashFunction(name);
-        SymbolInfo *symbolInfo = lookUp(name);
+        SymbolInfo *symbolInfo = lookUp(name); //Check for existence
 
         if (symbolInfo != nullptr) {
+            //Already exists
             return false;
         } else {
             symbolInfo = scopeTable[hashValueIndex];
-            if (symbolInfo->getName() == "") {
-                symbolInfo->setName(name);
-                symbolInfo->setType(type);
+            if (symbolInfo == nullptr) {
+                //Bucket is empty
+                SymbolInfo *newSymbolInfo = new SymbolInfo(name, type);
+                scopeTable[hashValueIndex] = newSymbolInfo;
                 cout << "Inserted into ScopeTable# " << getId() << " at position " << hashValueIndex << ", 0" << endl;
             } else {
+                //Bucket is not empty
                 int counter = 1;
+                //Get to the last object of the linked list
                 while (symbolInfo->getNextObj() != nullptr) {
                     symbolInfo = symbolInfo->getNextObj();
                     counter++;
@@ -83,10 +89,13 @@ public:
     }
 
     SymbolInfo* lookUp(string name) {
+        //Get the bucket
         int hashValueIndex = hashFunction(const_cast<char *>(name.c_str()));
         SymbolInfo *symbolInfo = scopeTable[hashValueIndex];
+
         int counter = 0;
-        while (symbolInfo != nullptr && !symbolInfo->getName().empty()) {
+        while (symbolInfo != nullptr) {
+            //if nullptr, then no object exists
             if (symbolInfo->getName() == name) {
                 cout << "Found in ScopeTable# " << scopeTableId << " at position " << hashValueIndex << ", " << counter << endl;
                 return symbolInfo;
@@ -98,19 +107,29 @@ public:
     }
 
     bool deleteEntry(string name) {
+        //Look for existence
         int hashValueIndex = hashFunction(const_cast<char *>(name.c_str()));
         SymbolInfo *symbolToDelete = lookUp(name);
+
         if (symbolToDelete == nullptr) {
+            //Not exist
             cout << "Not found" << endl;
             return false;
         } else {
-            SymbolInfo *firstSymbolInfo = scopeTable[hashValueIndex];
+            //Found
+            SymbolInfo *firstSymbolInfo = scopeTable[hashValueIndex]; //Get the first object of the bucket
             int counter = 0;
+
             if (symbolToDelete == firstSymbolInfo) {
+                //First object needs to be deleted
                 if (symbolToDelete->getNextObj() == nullptr) {
+                    //No sibling of first object
                     scopeTable[hashValueIndex]->setName("");
                     scopeTable[hashValueIndex]->setType("");
+                    scopeTable[hashValueIndex] = nullptr;
+                    delete symbolToDelete;
                 } else {
+                    //First object has siblings, first sibling will be the new first object now
                     scopeTable[hashValueIndex] = symbolToDelete->getNextObj();
                     symbolToDelete->setType("");
                     symbolToDelete->setName("");
@@ -118,6 +137,7 @@ public:
                     delete symbolToDelete;
                 }
             } else {
+                //Any serial other than first object
                 while (firstSymbolInfo->getNextObj() != symbolToDelete) {
                     firstSymbolInfo = firstSymbolInfo->getNextObj();
                     counter++;
@@ -140,9 +160,9 @@ public:
         for (int i = 0; i < bucketSize; i++) {
             SymbolInfo *symbolInfo = scopeTable[i];
             cout << i << " --> ";
-            if (!symbolInfo->getName().empty()) {
+            if (symbolInfo != nullptr) {
                 cout << "<" << symbolInfo->getName() << " : " << symbolInfo->getType() << "> ";
-                while (symbolInfo->getNextObj() != nullptr) {
+                while (symbolInfo->getNextObj() != nullptr) { //Get the siblings
                     symbolInfo = symbolInfo->getNextObj();
                     cout << "<" << symbolInfo->getName() << " : " << symbolInfo->getType() << "> ";
                 }
@@ -159,7 +179,7 @@ public:
         this->parentScope = parentScope;
     }
 
-    void increaseNumberOfChld() {
+    void increaseNumberOfChild() {
         this->numberOfChild++;
     }
 
@@ -169,13 +189,13 @@ public:
 
     ~ScopeTable()
     {
+        //Called when delete calls
         numberOfChild = 0;
         for (int i = 0; i < bucketSize; i++) {
             delete scopeTable[i];
         }
-        delete scopeTable;
+        delete[] scopeTable;
         cout << "ScopeTable with id " << scopeTableId << " removed" << endl;
-        scopeTableId = "";
     }
 };
 

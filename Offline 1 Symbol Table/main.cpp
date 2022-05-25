@@ -1,7 +1,5 @@
 #include <iostream>
-#include <bits/stdc++.h>
 #include <string>
-#include <filesystem>
 
 #include "SymbolTable.h"
 
@@ -54,5 +52,6 @@ int main() {
             cout << "Invalid Command" << endl;
         }
     }
+    delete symbolTable;
     return 0;
 }
