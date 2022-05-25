@@ -37,11 +37,7 @@ public:
     }
 
     bool remove(string name) {
-        if (lookUp(name) == nullptr) {
-            return false;
-        } else {
-            return true;
-        }
+        return currentScopeTable->deleteEntry(name);
     }
 
     void printAllScopeTable() {
@@ -74,7 +70,9 @@ public:
     }
 
     void exitCurrentScope() {
-        cout << "Exit new scope" << endl;
+        ScopeTable* temp = currentScopeTable;
+        currentScopeTable = temp->getParentScope();
+        delete temp;
     }
 
     ~SymbolTable() {

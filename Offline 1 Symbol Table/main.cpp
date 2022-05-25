@@ -31,6 +31,7 @@ int main() {
             }
         } else if (input == "D") {
             //Delete name
+            cin >> name;
             symbolTable->remove(name);
         } else if (input == "P") {
             //Print All or Current

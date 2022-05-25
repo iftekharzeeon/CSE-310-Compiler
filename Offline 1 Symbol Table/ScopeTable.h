@@ -15,7 +15,7 @@ using namespace std;
 class ScopeTable {
 private:
     int bucketSize;
-    SymbolInfo *scopeTable;
+    SymbolInfo **scopeTable;
     ScopeTable* parentScope;
     string scopeTableId;
     int numberOfChild;
@@ -24,7 +24,12 @@ public:
     ScopeTable(int bucketSize)
     {
         this->bucketSize = bucketSize;
-        scopeTable = new SymbolInfo[bucketSize];
+
+        scopeTable = new SymbolInfo*[bucketSize];
+        for (int i = 0; i < bucketSize; i++) {
+            SymbolInfo *symbolInfo = new SymbolInfo();
+            scopeTable[i] = symbolInfo;
+        }
         parentScope = nullptr;
         scopeTableId = "1";
         numberOfChild = 0;
@@ -57,7 +62,7 @@ public:
         if (symbolInfo != nullptr) {
             return false;
         } else {
-            symbolInfo = &scopeTable[hashValueIndex];
+            symbolInfo = scopeTable[hashValueIndex];
             if (symbolInfo->getName() == "") {
                 symbolInfo->setName(name);
                 symbolInfo->setType(type);
@@ -79,7 +84,7 @@ public:
 
     SymbolInfo* lookUp(string name) {
         int hashValueIndex = hashFunction(const_cast<char *>(name.c_str()));
-        SymbolInfo *symbolInfo = &scopeTable[hashValueIndex];
+        SymbolInfo *symbolInfo = scopeTable[hashValueIndex];
         int counter = 0;
         while (symbolInfo != nullptr && !symbolInfo->getName().empty()) {
             if (symbolInfo->getName() == name) {
@@ -92,10 +97,48 @@ public:
         return nullptr;
     }
 
+    bool deleteEntry(string name) {
+        int hashValueIndex = hashFunction(const_cast<char *>(name.c_str()));
+        SymbolInfo *symbolToDelete = lookUp(name);
+        if (symbolToDelete == nullptr) {
+            cout << "Not found" << endl;
+            return false;
+        } else {
+            SymbolInfo *firstSymbolInfo = scopeTable[hashValueIndex];
+            int counter = 0;
+            if (symbolToDelete == firstSymbolInfo) {
+                if (symbolToDelete->getNextObj() == nullptr) {
+                    scopeTable[hashValueIndex]->setName("");
+                    scopeTable[hashValueIndex]->setType("");
+                } else {
+                    scopeTable[hashValueIndex] = symbolToDelete->getNextObj();
+                    symbolToDelete->setType("");
+                    symbolToDelete->setName("");
+                    symbolToDelete->setNextObj(nullptr);
+                    delete symbolToDelete;
+                }
+            } else {
+                while (firstSymbolInfo->getNextObj() != symbolToDelete) {
+                    firstSymbolInfo = firstSymbolInfo->getNextObj();
+                    counter++;
+                }
+                counter++;
+                firstSymbolInfo->setNextObj(symbolToDelete->getNextObj());
+                symbolToDelete->setType("");
+                symbolToDelete->setName("");
+                symbolToDelete->setNextObj(nullptr);
+                delete symbolToDelete;
+            }
+            cout << "Deleted Entry " << hashValueIndex << " , " << counter << " from current ScopeTable";
+
+            return true;
+        }
+    }
+
     void print() {
         cout << "ScopeTable# " << scopeTableId << endl;
         for (int i = 0; i < bucketSize; i++) {
-            SymbolInfo *symbolInfo = &scopeTable[i];
+            SymbolInfo *symbolInfo = scopeTable[i];
             cout << i << " --> ";
             if (!symbolInfo->getName().empty()) {
                 cout << "<" << symbolInfo->getName() << " : " << symbolInfo->getType() << "> ";
@@ -126,7 +169,13 @@ public:
 
     ~ScopeTable()
     {
-
+        numberOfChild = 0;
+        for (int i = 0; i < bucketSize; i++) {
+            delete scopeTable[i];
+        }
+        delete scopeTable;
+        cout << "ScopeTable with id " << scopeTableId << " removed" << endl;
+        scopeTableId = "";
     }
 };
 

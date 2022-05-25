@@ -20,6 +20,9 @@ private:
 public:
     SymbolInfo(/* args */)
     {
+        this->name = "";
+        this->type = "";
+        this->next = nullptr;
 
     }
 
@@ -62,9 +65,9 @@ public:
 
     ~SymbolInfo()
     {
-        //this->name = "";
-        //this->type = "";
-        //delete this->next;
+        this->name = "";
+        this->type = "";
+        this->next = nullptr;
     }
 };
 
