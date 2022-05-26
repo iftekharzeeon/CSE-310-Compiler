@@ -207,7 +207,9 @@ public:
         //Called when delete calls
         numberOfChild = 0;
         for (int i = 0; i < bucketSize; i++) {
-            delete scopeTable[i];
+            if (scopeTable[i] != nullptr) {
+                delete scopeTable[i];
+            }
         }
         delete scopeTable;
         cout << "ScopeTable with id " << scopeTableId << " removed" << endl;
