@@ -1,6 +1,3 @@
-#include <iostream>
-#include <string>
-
 #include "SymbolTable.h"
 
 using namespace std;

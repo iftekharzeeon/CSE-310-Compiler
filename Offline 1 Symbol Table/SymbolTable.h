@@ -2,8 +2,8 @@
 // Created by zeeon on 5/23/22.
 //
 
-#ifndef OFFLINE_1_SYMBOL_TABLE_SYMBOLTABLE_H
-#define OFFLINE_1_SYMBOL_TABLE_SYMBOLTABLE_H
+#ifndef SYMBOLTABLE_H
+#define SYMBOLTABLE_H
 
 #include "ScopeTable.h"
 
@@ -93,4 +93,4 @@ public:
 };
 
 
-#endif //OFFLINE_1_SYMBOL_TABLE_SYMBOLTABLE_H
+#endif

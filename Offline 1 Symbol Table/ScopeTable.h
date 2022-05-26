@@ -2,11 +2,8 @@
 // Created by zeeon on 5/23/22.
 //
 
-#ifndef OFFLINE_1_SYMBOL_TABLE_SCOPETABLE_H
-#define OFFLINE_1_SYMBOL_TABLE_SCOPETABLE_H
-
-#include <iostream>
-#include <bits/stdc++.h>
+#ifndef SCOPETABLE_H
+#define SCOPETABLE_H
 
 #include "SymbolInfo.h"
 
@@ -218,4 +215,4 @@ public:
 };
 
 
-#endif //OFFLINE_1_SYMBOL_TABLE_SCOPETABLE_H
+#endif

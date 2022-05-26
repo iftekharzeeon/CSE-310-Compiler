@@ -2,11 +2,10 @@
 // Created by zeeon on 5/23/22.
 //
 
-#ifndef OFFLINE_1_SYMBOL_TABLE_SYMBOLINFO_H
-#define OFFLINE_1_SYMBOL_TABLE_SYMBOLINFO_H
+#ifndef SYMBOLINFO_H
+#define SYMBOLINFO_H
 
 #include <iostream>
-#include <bits/stdc++.h>
 #include <string>
 
 using namespace std;
@@ -72,4 +71,4 @@ public:
 };
 
 
-#endif //OFFLINE_1_SYMBOL_TABLE_SYMBOLINFO_H
+#endif
