@@ -59,10 +59,11 @@ public:
 
     bool insert(char *name, string type) {
         int hashValueIndex = hashFunction(name);
-        SymbolInfo *symbolInfo = lookUp(name); //Check for existence
+        SymbolInfo *symbolInfo = existCheck(name); //Check for existence
 
         if (symbolInfo != nullptr) {
             //Already exists
+            cout << "<" + symbolInfo->getName() + " : " << symbolInfo->getType() + "> already exists in current ScopeTable" << endl;
             return false;
         } else {
             symbolInfo = scopeTable[hashValueIndex];
@@ -82,10 +83,27 @@ public:
                 SymbolInfo *newSymbolInfo;
                 newSymbolInfo = new SymbolInfo(name, type);
                 symbolInfo->setNextObj(newSymbolInfo);
-                cout << "Inserted into ScopeTable " << getId() << " at position " << hashValueIndex << ", " << counter << endl;
+                cout << "Inserted into ScopeTable# " << getId() << " at position " << hashValueIndex << ", " << counter << endl;
             }
             return true;
         }
+    }
+
+    SymbolInfo* existCheck(string name) {
+        //Get the bucket
+        int hashValueIndex = hashFunction(const_cast<char *>(name.c_str()));
+        SymbolInfo *symbolInfo = scopeTable[hashValueIndex];
+
+        int counter = 0;
+        while (symbolInfo != nullptr) {
+            //if nullptr, then no object exists
+            if (symbolInfo->getName() == name) {
+                return symbolInfo;
+            }
+            symbolInfo = symbolInfo->getNextObj();
+            counter++;
+        }
+        return nullptr;
     }
 
     SymbolInfo* lookUp(string name) {
@@ -194,7 +212,7 @@ public:
         for (int i = 0; i < bucketSize; i++) {
             delete scopeTable[i];
         }
-        delete[] scopeTable;
+        delete scopeTable;
         cout << "ScopeTable with id " << scopeTableId << " removed" << endl;
     }
 };

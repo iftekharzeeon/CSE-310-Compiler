@@ -44,10 +44,10 @@ public:
     }
 
     void printAllScopeTable() {
+        cout << endl;
         ScopeTable *temp = currentScopeTable;
         while (temp != nullptr) {
             temp->print();
-            cout << endl;
             cout << endl;
             temp = temp->getParentScope();
         }
@@ -78,7 +78,7 @@ public:
             currentScopeTable = newScopeTable;
         }
 
-        cout << "New ScopeTable with scopeTableId " << currentScopeTable->getId() + " created" << endl;
+        cout << "New ScopeTable with id " << currentScopeTable->getId() + " created" << endl;
     }
 
     void exitCurrentScope() {
