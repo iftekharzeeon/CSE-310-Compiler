@@ -17,7 +17,7 @@ private:
     string type;
     SymbolInfo *next;
 public:
-    SymbolInfo(/* args */)
+    SymbolInfo()
     {
         this->name = "";
         this->type = "";

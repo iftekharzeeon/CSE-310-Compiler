@@ -34,7 +34,7 @@ public:
     }
 
     //for Windows OS it needs to be unsigned long, for linux it is unsigned int
-    unsigned int hashFunction(char *str)
+    unsigned int hashFunction(const char *str)
     {
         unsigned int hash = 0;
         int c;
@@ -54,8 +54,8 @@ public:
         this->scopeTableId = _id;
     }
 
-    bool insert(char *name, string type) {
-        int hashValueIndex = hashFunction(name);
+    bool insert(string name, string type) {
+        int hashValueIndex = hashFunction(name.c_str());
         SymbolInfo *symbolInfo = existCheck(name); //Check for existence
 
         if (symbolInfo != nullptr) {
@@ -88,7 +88,7 @@ public:
 
     SymbolInfo* existCheck(string name) {
         //Get the bucket
-        int hashValueIndex = hashFunction(const_cast<char *>(name.c_str()));
+        int hashValueIndex = hashFunction(name.c_str());
         SymbolInfo *symbolInfo = scopeTable[hashValueIndex];
 
         int counter = 0;
@@ -105,7 +105,7 @@ public:
 
     SymbolInfo* lookUp(string name) {
         //Get the bucket
-        int hashValueIndex = hashFunction(const_cast<char *>(name.c_str()));
+        int hashValueIndex = hashFunction(name.c_str());
         SymbolInfo *symbolInfo = scopeTable[hashValueIndex];
 
         int counter = 0;
@@ -123,7 +123,7 @@ public:
 
     bool deleteEntry(string name) {
         //Look for existence
-        int hashValueIndex = hashFunction(const_cast<char *>(name.c_str()));
+        int hashValueIndex = hashFunction(name.c_str());
         SymbolInfo *symbolToDelete = lookUp(name);
 
         if (symbolToDelete == nullptr) {
@@ -164,7 +164,7 @@ public:
                 symbolToDelete->setNextObj(nullptr);
                 delete symbolToDelete;
             }
-            cout << "Deleted Entry " << hashValueIndex << " , " << counter << " from current ScopeTable";
+            cout << "Deleted Entry " << hashValueIndex << " , " << counter << " from current ScopeTable" << endl;
 
             return true;
         }

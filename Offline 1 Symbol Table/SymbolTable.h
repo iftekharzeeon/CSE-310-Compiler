@@ -16,10 +16,11 @@ public:
         //Initial Scope
         currentScopeTable = new ScopeTable(bucketSize);
         rootScope = 1;
+        cout << "ScopeTable #1 Initiated" << endl;
     }
 
     bool insert(string name, string type) {
-        if (currentScopeTable->insert(const_cast<char *>(name.c_str()), type)) {
+        if (currentScopeTable->insert(name, type)) {
             return true;
         } else {
             return false;
