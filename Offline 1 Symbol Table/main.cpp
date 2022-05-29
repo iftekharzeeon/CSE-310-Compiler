@@ -79,5 +79,7 @@ int main() {
     for (int i = 1; i <= activeScopeTableCount; i++) {
         symbolTable->exitCurrentScope();
     }
+
+    delete symbolTable;
     return 0;
 }
