@@ -68,7 +68,7 @@ public:
                 //Bucket is empty
                 SymbolInfo *newSymbolInfo = new SymbolInfo(name, type);
                 scopeTable[hashValueIndex] = newSymbolInfo;
-                cout << "Inserted into ScopeTable# " << getId() << " at position " << hashValueIndex << ", 0" << endl;
+                cout << "Inserted in ScopeTable# " << getId() << " at position " << hashValueIndex << ", 0" << endl;
             } else {
                 //Bucket is not empty
                 int counter = 1;

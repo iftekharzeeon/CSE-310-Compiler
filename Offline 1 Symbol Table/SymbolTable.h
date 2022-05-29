@@ -74,13 +74,14 @@ public:
     }
 
     void exitCurrentScope() {
+        ScopeTable *scopeTable = currentScopeTable->getParentScope();
         cout << "ScopeTable with id " << currentScopeTable->getId() << " removed" << endl;
-        currentScopeTable = currentScopeTable->getParentScope();
-        
+        delete currentScopeTable;
+        currentScopeTable = scopeTable;   
     }
 
     ~SymbolTable() {
-        delete currentScopeTable;
+        
     }
 };
 

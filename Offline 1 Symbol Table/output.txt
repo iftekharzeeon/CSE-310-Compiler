@@ -1,37 +1,126 @@
 ScopeTable #1 Initiated
-Inserted into ScopeTable# 1 at position 4, 0
-Inserted into ScopeTable# 1 at position 0, 0
-Found in ScopeTable# 1 at position 4, 0
-Not found
-Inserted into ScopeTable# 1 at position 4, 1
+Inserted in ScopeTable# 1 at position 6, 0
+New ScopeTable with id 1.1 created
+Inserted in ScopeTable# 1.1 at position 6, 0
+New ScopeTable with id 1.1.1 created
+Inserted in ScopeTable# 1.1.1 at position 6, 0
 
-ScopeTable# 1
-0 --> <i : VAR> 
+ScopeTable# 1.1.1
+0 --> 
 1 --> 
 2 --> 
 3 --> 
-4 --> <foo : FUNCTION> <5 : NUMBER> 
+4 --> 
 5 --> 
-6 --> 
+6 --> <o : o> 
 
-Not found
-Found in ScopeTable# 1 at position 0, 0
-Deleted Entry 0 , 0 from current ScopeTable
+ScopeTable# 1.1
+0 --> 
+1 --> 
+2 --> 
+3 --> 
+4 --> 
+5 --> 
+6 --> <h : h> 
 
 ScopeTable# 1
 0 --> 
 1 --> 
 2 --> 
 3 --> 
-4 --> <foo : FUNCTION> <5 : NUMBER> 
+4 --> 
+5 --> 
+6 --> <a : a> 
+
+Found in ScopeTable# 1.1.1 at position 6, 0
+Found in ScopeTable# 1 at position 6, 0
+ScopeTable with id 1.1.1 removed
+New ScopeTable with id 1.1.2 created
+Inserted in ScopeTable# 1.1.2 at position 4, 0
+ScopeTable with id 1.1.2 removed
+New ScopeTable with id 1.1.3 created
+Inserted in ScopeTable# 1.1.3 at position 0, 0
+
+ScopeTable# 1.1.3
+0 --> <i : VAR> 
+1 --> 
+2 --> 
+3 --> 
+4 --> 
 5 --> 
 6 --> 
 
-New ScopeTable with id 1.1 created
-Inserted into ScopeTable# 1.1 at position 6, 0
-Inserted into ScopeTable# 1.1 at position 1, 0
-
 ScopeTable# 1.1
+0 --> 
+1 --> 
+2 --> 
+3 --> 
+4 --> 
+5 --> 
+6 --> <h : h> 
+
+ScopeTable# 1
+0 --> 
+1 --> 
+2 --> 
+3 --> 
+4 --> 
+5 --> 
+6 --> <a : a> 
+
+Not found
+Not found
+ScopeTable with id 1.1.3 removed
+ScopeTable with id 1.1 removed
+New ScopeTable with id 1.2 created
+Inserted in ScopeTable# 1.2 at position 4, 0
+
+ScopeTable# 1.2
+0 --> 
+1 --> 
+2 --> 
+3 --> 
+4 --> <5 : NUMBER> 
+5 --> 
+6 --> 
+
+ScopeTable# 1
+0 --> 
+1 --> 
+2 --> 
+3 --> 
+4 --> 
+5 --> 
+6 --> <a : a> 
+
+Not found
+Not found
+
+ScopeTable# 1.2
+0 --> 
+1 --> 
+2 --> 
+3 --> 
+4 --> <5 : NUMBER> 
+5 --> 
+6 --> 
+
+ScopeTable# 1
+0 --> 
+1 --> 
+2 --> 
+3 --> 
+4 --> 
+5 --> 
+6 --> <a : a> 
+
+New ScopeTable with id 1.2.1 created
+ScopeTable with id 1.2.1 removed
+New ScopeTable with id 1.2.2 created
+Inserted in ScopeTable# 1.2.2 at position 6, 0
+Inserted in ScopeTable# 1.2.2 at position 1, 0
+
+ScopeTable# 1.2.2
 0 --> 
 1 --> <== : RELOP> 
 2 --> 
@@ -40,21 +129,30 @@ ScopeTable# 1.1
 5 --> 
 6 --> <<= : RELOP> 
 
+ScopeTable# 1.2
+0 --> 
+1 --> 
+2 --> 
+3 --> 
+4 --> <5 : NUMBER> 
+5 --> 
+6 --> 
+
 ScopeTable# 1
 0 --> 
 1 --> 
 2 --> 
 3 --> 
-4 --> <foo : FUNCTION> <5 : NUMBER> 
+4 --> 
 5 --> 
-6 --> 
+6 --> <a : a> 
 
 <<= : RELOP> already exists in current ScopeTable
-Inserted into ScopeTable# 1.1 at position 4, 0
-Found in ScopeTable# 1.1 at position 1, 0
+Inserted in ScopeTable# 1.2.2 at position 4, 0
+Found in ScopeTable# 1.2.2 at position 1, 0
 Deleted Entry 1 , 0 from current ScopeTable
 
-ScopeTable# 1.1
+ScopeTable# 1.2.2
 0 --> 
 1 --> 
 2 --> 
@@ -63,32 +161,54 @@ ScopeTable# 1.1
 5 --> 
 6 --> <<= : RELOP> 
 
+ScopeTable# 1.2
+0 --> 
+1 --> 
+2 --> 
+3 --> 
+4 --> <5 : NUMBER> 
+5 --> 
+6 --> 
+
 ScopeTable# 1
 0 --> 
 1 --> 
 2 --> 
 3 --> 
-4 --> <foo : FUNCTION> <5 : NUMBER> 
+4 --> 
 5 --> 
-6 --> 
+6 --> <a : a> 
 
-ScopeTable with id 1.1 removed
-Inserted into ScopeTable# 1 at position 4, 2
-Inserted into ScopeTable# 1 at position 2, 0
-
-ScopeTable# 1
+ScopeTable with id 1.2.2 removed
+Inserted into ScopeTable# 1.2 at position 4, 1
+Inserted in ScopeTable# 1.2 at position 2, 0
+ScopeTable# 1.2
 0 --> 
 1 --> 
 2 --> <k : k> 
 3 --> 
-4 --> <foo : FUNCTION> <5 : NUMBER> <t : t> 
+4 --> <5 : NUMBER> <t : t> 
 5 --> 
 6 --> 
 
-ScopeTable with id 1 removed
-No active scope table found
-No active scope table found
-ScopeTable #1 Initiated
-Inserted into ScopeTable# 1 at position 2, 0
+ScopeTable# 1.2
+0 --> 
+1 --> 
+2 --> <k : k> 
+3 --> 
+4 --> <5 : NUMBER> <t : t> 
+5 --> 
+6 --> 
+
+ScopeTable# 1
+0 --> 
+1 --> 
+2 --> 
+3 --> 
+4 --> 
+5 --> 
+6 --> <a : a> 
+
 Exiting program
+ScopeTable with id 1.2 removed
 ScopeTable with id 1 removed
