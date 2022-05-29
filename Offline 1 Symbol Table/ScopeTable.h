@@ -212,7 +212,6 @@ public:
             }
         }
         delete scopeTable;
-        cout << "ScopeTable with id " << scopeTableId << " removed" << endl;
     }
 };
 
