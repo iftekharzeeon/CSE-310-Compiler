@@ -19,8 +19,8 @@ int main() {
             cin >> name;
             cin >> type;
             if (activeScopeTableCount == 0) {
-                cout << "No active scope table found" << endl;
-                continue;
+                symbolTable = new SymbolTable(numberOfBucket);
+                activeScopeTableCount = 1;
             }
             symbolTable->insert(name, type);
         } else if(input == "L") {
@@ -45,19 +45,15 @@ int main() {
         } else if (input == "P") {
             //Print All or Current
             cin >> secondInput;
-            if (secondInput == "A") {
-                //Print All
-                if (activeScopeTableCount == 0) {
+            if (activeScopeTableCount == 0) {
                     cout << "No active scope table found" << endl;
                     continue;
-                }
+            }
+            if (secondInput == "A") {
+                //Print All
                 symbolTable->printAllScopeTable();
             } else if (secondInput == "C") {
                 //Print Current
-                if (activeScopeTableCount == 0) {
-                    cout << "No active scope table found" << endl;
-                    continue;
-                }
                 symbolTable->printCurrentScopeTable();
             }
         } else if (input == "S") {

@@ -1,4 +1,3 @@
-ScopeTable #1 Initiated
 Inserted into ScopeTable# 1 at position 6, 0
 New ScopeTable with id 1.1 created
 Inserted into ScopeTable# 1.1 at position 6, 0
@@ -151,7 +150,6 @@ ScopeTable# 1
 Inserted into ScopeTable# 1.2.2 at position 4, 0
 Found in ScopeTable# 1.2.2 at position 1, 0
 Deleted Entry 1 , 0 from current ScopeTable
-
 ScopeTable# 1.2.2
 0 --> 
 1 --> 
