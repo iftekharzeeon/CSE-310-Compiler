@@ -1,7 +1,7 @@
 int main(){
 	int a,b;
 	a=a+1;
-	b = 3.14115E;
+	b = 3.14115E-10;
 	char ch='a';
 	b++;
 	a--;

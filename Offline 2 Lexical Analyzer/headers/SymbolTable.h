@@ -51,6 +51,7 @@ public:
             outputMsg += temp->print();
             // cout << endl;
             temp = temp->getParentScope();
+            outputMsg += "\n";
         }
         outputMsg += "\n";
         return outputMsg;

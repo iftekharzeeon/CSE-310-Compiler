@@ -40,7 +40,7 @@ DIGIT [0-9]
 DIGITS {DIGIT}+
 
 ALPHABET [A-Za-z]
-ALPHABET_ [{ALPHABET}_]
+ALPHABET_ {ALPHABET}|_
 
 FLOAT_NUMBER {DIGITS}?(\.{DIGITS})(E[+-]?{DIGITS})?
 
@@ -48,6 +48,7 @@ CHARACTER '{ALPHABET}'
 
 OPERATORS "+"|"-"|"="|"*"|"/"|"%"|"++"|"--"|"<"|"<="|">"|">="|"=="|"!="|"&&"|"||"|"!"|"("|")"|"{"|"}"|"["|"]"|","|";"
 
+IDENTIFIERS {ALPHABET_}({DIGITS}|{ALPHABET_})*
 
 NEW_LINE [\n]
 
@@ -180,11 +181,24 @@ NEW_LINE [\n]
 
 }
 
+{IDENTIFIERS} {
+	string foundToken = yytext;
+
+	string newToken = "<ID," + foundToken + "> ";
+	tokens += newToken;
+	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <ID> " + "Lexeme " + yytext + " found\n\n";
+
+	if (symbolTable->insert(foundToken, "ID")) {
+		logFileText += symbolTable->printAllScopeTable();
+	}
+}
+
 {NEW_LINE} {
 	lineCount++;
 }
 
 . {}
+
 %%
 
 int main(int argc,char *argv[]){
