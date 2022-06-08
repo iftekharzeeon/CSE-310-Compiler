@@ -1,0 +1,10 @@
+Line no 1: Token <INT> Lexeme int found
+
+Line no 2: Token <INT> Lexeme int found
+
+Line no 4: Token <CHAR> Lexeme char found
+
+Line no 6: Token <CHAR> Lexeme char found
+
+Line no 13: Token <RETURN> Lexeme return found
+
