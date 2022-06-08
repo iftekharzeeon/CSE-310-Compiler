@@ -3,6 +3,8 @@ int main(){
 	a=a+1;
 	b = 3.14115E;
 	char ch='a';
+	b++;
+	a--;
 	ch='\t';
 	char c[]="ab\td";
 	printf("abc\

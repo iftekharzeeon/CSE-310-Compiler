@@ -60,7 +60,7 @@ public:
 
         if (symbolInfo != nullptr) {
             //Already exists
-            cout << "<" + symbolInfo->getName() + " : " << symbolInfo->getType() + "> already exists in current ScopeTable" << endl;
+            // cout << "<" + symbolInfo->getName() + " : " << symbolInfo->getType() + "> already exists in current ScopeTable" << endl;
             return false;
         } else {
             symbolInfo = scopeTable[hashValueIndex];
@@ -68,7 +68,7 @@ public:
                 //Bucket is empty
                 SymbolInfo *newSymbolInfo = new SymbolInfo(name, type);
                 scopeTable[hashValueIndex] = newSymbolInfo;
-                cout << "Inserted in ScopeTable# " << getId() << " at position " << hashValueIndex << ", 0" << endl;
+                // cout << "Inserted in ScopeTable# " << getId() << " at position " << hashValueIndex << ", 0" << endl;
             } else {
                 //Bucket is not empty
                 int counter = 1;
@@ -80,7 +80,7 @@ public:
                 SymbolInfo *newSymbolInfo;
                 newSymbolInfo = new SymbolInfo(name, type);
                 symbolInfo->setNextObj(newSymbolInfo);
-                cout << "Inserted into ScopeTable# " << getId() << " at position " << hashValueIndex << ", " << counter << endl;
+                // cout << "Inserted into ScopeTable# " << getId() << " at position " << hashValueIndex << ", " << counter << endl;
             }
             return true;
         }
@@ -170,20 +170,27 @@ public:
         }
     }
 
-    void print() {
-        cout << "ScopeTable# " << scopeTableId << endl;
+    string print() {
+        string outputMsg = "";
+        outputMsg += "ScopeTable# " + scopeTableId + "\n";
+        // cout << "ScopeTable# " << scopeTableId << endl;
         for (int i = 0; i < bucketSize; i++) {
             SymbolInfo *symbolInfo = scopeTable[i];
-            cout << i << " --> ";
             if (symbolInfo != nullptr) {
-                cout << "<" << symbolInfo->getName() << " : " << symbolInfo->getType() << "> ";
+                outputMsg += to_string(i) + " --> ";
+                outputMsg += "<" + symbolInfo->getName() + " : " + symbolInfo->getType() + "> "; 
+                // cout << i << " --> ";
+                // cout << "<" << symbolInfo->getName() << " : " << symbolInfo->getType() << "> ";
                 while (symbolInfo->getNextObj() != nullptr) { //Get the siblings
                     symbolInfo = symbolInfo->getNextObj();
-                    cout << "<" << symbolInfo->getName() << " : " << symbolInfo->getType() << "> ";
+                    outputMsg += "<" + symbolInfo->getName() + " : " + symbolInfo->getType() + "> ";
+                    // cout << "<" << symbolInfo->getName() << " : " << symbolInfo->getType() << "> ";
                 }
+                outputMsg += "\n";
             }
-            cout << endl;
+            // cout << endl;
         }
+        return outputMsg;
     }
 
     ScopeTable *getParentScope() {

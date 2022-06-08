@@ -1,0 +1,201 @@
+ADD_OP [+-]
+
+ASSIGN_OP [=]
+
+MUL_OP "\*"|"\/"|"\%"
+
+INC_OP "++"|"--"
+
+REL_OP "<"|"<="|">"|">="|"=="|"!="
+
+LOGIC_OP "&&"|"\|\|"
+
+NOT_OP "!"
+
+LAPREN "("
+
+RPAREN ")"
+
+LCURL "{"
+
+RCURL "}"
+
+LTHIRD "["
+
+RTHIRD "]"
+
+COMMA ","
+
+SEMICOLON ";"
+
+
+
+
+
+
+
+
+{ADD_OP} {
+	string foundToken = yytext;
+
+	string newToken = "<ADDOP," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <ADDOP> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{ASSIGN_OP} {
+	string foundToken = yytext;
+
+	string newToken = "<ASSIGNOP," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <ASSIGNOP> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{MUL_OP} {
+	string foundToken = yytext;
+
+	string newToken = "<MULOP," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <MULOP> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{INC_OP} {
+	string foundToken = yytext;
+
+	string newToken = "<INCOP," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <INCOP> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{REL_OP} {
+	string foundToken = yytext;
+
+	string newToken = "<RELOP," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <RELOP> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{LOGIC_OP} {
+	string foundToken = yytext;
+
+	string newToken = "<LOGICOP," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <LOGICOP> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{NOT_OP} {
+	string foundToken = yytext;
+
+	string newToken = "<NOTOP," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <NOTOP> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{LAPREN} {
+	string foundToken = yytext;
+
+	string newToken = "<LAPREN," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <LAPREN> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{RPAREN} {
+	string foundToken = yytext;
+
+	string newToken = "<RPAREN," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <RPAREN> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{LCURL} {
+	string foundToken = yytext;
+
+	string newToken = "<LCURL," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <LCURL> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{RCURL} {
+	string foundToken = yytext;
+
+	string newToken = "<RCURL," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <RCURL> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{LTHIRD} {
+	string foundToken = yytext;
+
+	string newToken = "<LTHIRD," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <LTHIRD> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{RTHIRD} {
+	string foundToken = yytext;
+
+	string newToken = "<RTHIRD," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <RTHIRD> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{COMMA} {
+	string foundToken = yytext;
+
+	string newToken = "<COMMA," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <COMMA> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}
+
+{SEMICOLON} {
+	string foundToken = yytext;
+
+	string newToken = "<SEMICOLON," + foundToken + "> ";
+	tokens += newToken;
+	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <SEMICOLON> " + "Lexeme " + yytext + " found\n\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
+}

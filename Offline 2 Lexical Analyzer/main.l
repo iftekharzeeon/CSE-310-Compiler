@@ -46,6 +46,9 @@ FLOAT_NUMBER {DIGITS}?(\.{DIGITS})(E[+-]?{DIGITS})?
 
 CHARACTER '{ALPHABET}'
 
+OPERATORS "+"|"-"|"="|"*"|"/"|"%"|"++"|"--"|"<"|"<="|">"|">="|"=="|"!="|"&&"|"||"|"!"|"("|")"|"{"|"}"|"["|"]"|","|";"
+
+
 NEW_LINE [\n]
 
 %%
@@ -56,10 +59,7 @@ NEW_LINE [\n]
     string upperLetteredKeyword = to_upper(foundToken);
 	string newToken = "<" + upperLetteredKeyword + "> ";
 	tokens += newToken;
-	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token " + newToken + "Lexeme " + yytext + " found\n\n";
-
-	fprintf(tokenFile, "%s", tokens.c_str());
-	fprintf(logFile, "%s", logFileText.c_str());
+	logFileText += "Line no " + to_string(lineCount) + ":" + " Token " + newToken + "Lexeme " + yytext + " found\n\n";
 }
 
 {DIGITS} {
@@ -69,13 +69,11 @@ NEW_LINE [\n]
 
 	string newToken = "<CONST_INT," + foundToken + "> ";
 	tokens += newToken;
-	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <CONST_INT> " + "Lexeme " + yytext + " found\n\n";
+	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_INT> " + "Lexeme " + yytext + " found\n\n";
 
-	fprintf(tokenFile, "%s", tokens.c_str());
-	fprintf(logFile, "%s", logFileText.c_str());
-
-	symbolTable->insert(foundToken, "CONST_INT");
-	symbolTable->printAllScopeTable();
+	if (symbolTable->insert(foundToken, "CONST_INT")) {
+		logFileText += symbolTable->printAllScopeTable();
+	}
 }
 
 {FLOAT_NUMBER} {
@@ -84,13 +82,11 @@ NEW_LINE [\n]
 
 	string newToken = "<CONST_FLOAT," + foundToken + "> ";
 	tokens += newToken;
-	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <CONST_FLOAT> " + "Lexeme " + yytext + " found\n\n";
+	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_FLOAT> " + "Lexeme " + yytext + " found\n\n";
 
-	fprintf(tokenFile, "%s", tokens.c_str());
-	fprintf(logFile, "%s", logFileText.c_str());
-
-	symbolTable->insert(foundToken, "CONST_FLOAT");
-	symbolTable->printAllScopeTable();
+	if (symbolTable->insert(foundToken, "CONST_FLOAT")) {
+		logFileText += symbolTable->printAllScopeTable();
+	}
 }
 
 {CHARACTER} {
@@ -102,13 +98,86 @@ NEW_LINE [\n]
 	newToken += characterFound;
 	newToken += "> ";
 	tokens += newToken;
-	string logFileText = "Line no " + to_string(lineCount) + ":" + " Token <CONST_CHAR> " + "Lexeme " + yytext + " found --> " + newToken + "\n\n";
+	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_CHAR> " + "Lexeme " + yytext + " found --> " + newToken + "\n\n";
 
-	fprintf(tokenFile, "%s", tokens.c_str());
-	fprintf(logFile, "%s", logFileText.c_str());
+	if (symbolTable->insert(foundToken, "CONST_CHAR")) {
+		logFileText += symbolTable->printAllScopeTable();
+	}
+}
 
-	symbolTable->insert(foundToken, "CONST_CHAR");
-	symbolTable->printAllScopeTable();
+{OPERATORS} {
+	string foundToken = yytext;
+
+	string newToken;
+	string tokenType;
+
+	if (foundToken == "+" || foundToken == "-") {
+		newToken = "<ADDOP," + foundToken + "> ";
+		tokenType = "<ADDOP> ";
+
+	} else if (foundToken == "++" || foundToken == "--") {
+		newToken = "<INCOP," + foundToken + "> ";
+		tokenType = "<INCOP> ";
+	} else if (foundToken == "*" || foundToken == "/" || foundToken == "%") {
+		newToken = "<MULOP," + foundToken + "> ";
+		tokenType = "<MULOP> ";
+
+	} else if (foundToken == "<" || foundToken == "<=" || foundToken == ">" || foundToken == ">=" || foundToken == "==" || foundToken == "!=") {
+		newToken = "<RELOP," + foundToken + "> ";
+		tokenType = "<RELOP> ";
+
+	} else if (foundToken == "=") {
+		newToken = "<ASSIGNOP," + foundToken + "> ";
+		tokenType = "<ASSIGNOP> ";
+
+	} else if (foundToken == "&&" || foundToken == "||") {
+		newToken = "<LOGICOP," + foundToken + "> ";
+		tokenType = "<LOGICOP> ";
+
+	} else if (foundToken == "!") {
+		newToken = "<NOTOP," + foundToken + "> ";
+		tokenType = "<NOTOP> ";
+
+	} else if (foundToken == "(") {
+		newToken = "<LAPREN," + foundToken + "> ";
+		tokenType = "<LAPREN> ";
+		
+	} else if (foundToken == ")") {
+		newToken = "<RPAREN," + foundToken + "> ";
+		tokenType = "<RPAREN> ";
+
+	} else if (foundToken == "{") {
+		symbolTable->enterNewScope(BUCKET_SIZE);
+		newToken = "<LCURL," + foundToken + "> ";
+		tokenType = "<LCURL> ";
+		
+	} else if (foundToken == "}") {
+		symbolTable->exitCurrentScope();
+		newToken = "<RCURL," + foundToken + "> ";
+		tokenType = "<RCURL> ";
+
+	} else if (foundToken == "[") {
+		newToken = "<LTHIRD," + foundToken + "> ";
+		tokenType = "<LTHIRD> ";
+
+	} else if (foundToken == "]") {
+		newToken = "<RTHIRD," + foundToken + "> ";
+		tokenType = "<RTHIRD> ";
+
+	} else if (foundToken == ",") {
+		newToken = "<COMMA," + foundToken + "> ";
+		tokenType = "<COMMA> ";
+
+	} else if (foundToken == ";") {
+		newToken = "<SEMICOLON," + foundToken + "> ";
+		tokenType = "<SEMICOLON> ";
+
+	}
+
+	tokens += newToken;
+
+	logFileText += "Line no " + to_string(lineCount) + ":" + " Token " + tokenType + "Lexeme " + yytext + " found\n\n";
+
 }
 
 {NEW_LINE} {
@@ -139,6 +208,9 @@ int main(int argc,char *argv[]){
 
 	string lineCountText = "Total lines: " + to_string(lineCount) + "\n";
 	string errorCountText = "Total errors: " + to_string(errorCount) + "\n";
+
+	fprintf(tokenFile, "%s", tokens.c_str());
+	fprintf(logFile, "%s", logFileText.c_str());
 
 	fprintf(logFile, "%s", lineCountText.c_str());
 	fprintf(logFile, "%s", errorCountText.c_str());

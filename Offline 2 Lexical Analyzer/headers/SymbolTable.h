@@ -7,6 +7,7 @@
 
 #include "ScopeTable.h"
 
+
 class SymbolTable {
 private:
     ScopeTable *currentScopeTable;
@@ -14,7 +15,7 @@ public:
     SymbolTable(int bucketSize) {
         //Initial Scope
         currentScopeTable = new ScopeTable(bucketSize);
-        cout << "ScopeTable #1 Initiated" << endl;
+        // cout << "ScopeTable #1 Initiated" << endl;
     }
 
     bool insert(string name, string type) {
@@ -42,14 +43,17 @@ public:
         return currentScopeTable->deleteEntry(name);
     }
 
-    void printAllScopeTable() {
-        cout << endl;
+    string printAllScopeTable() {
+        string outputMsg = "";
+        // cout << endl;
         ScopeTable *temp = currentScopeTable;
         while (temp != nullptr) {
-            temp->print();
-            cout << endl;
+            outputMsg += temp->print();
+            // cout << endl;
             temp = temp->getParentScope();
         }
+        outputMsg += "\n";
+        return outputMsg;
     }
 
     void printCurrentScopeTable() {
@@ -70,12 +74,12 @@ public:
         newScopeTable->setId(newId);
         currentScopeTable = newScopeTable;
 
-        cout << "New ScopeTable with id " << currentScopeTable->getId() + " created" << endl;
+        // cout << "New ScopeTable with id " << currentScopeTable->getId() + " created" << endl;
     }
 
     void exitCurrentScope() {
         ScopeTable *scopeTable = currentScopeTable->getParentScope();
-        cout << "ScopeTable with id " << currentScopeTable->getId() << " removed" << endl;
+        // cout << "ScopeTable with id " << currentScopeTable->getId() << " removed" << endl;
         delete currentScopeTable;
         currentScopeTable = scopeTable;   
     }
