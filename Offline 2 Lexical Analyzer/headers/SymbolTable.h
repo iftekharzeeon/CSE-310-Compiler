@@ -53,7 +53,7 @@ public:
             temp = temp->getParentScope();
             outputMsg += "\n";
         }
-        outputMsg += "\n";
+        // outputMsg += "\n";
         return outputMsg;
     }
 

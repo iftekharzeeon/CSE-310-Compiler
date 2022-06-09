@@ -1,6 +1,8 @@
 %option noyywrap
 
 %x STRING_STATE
+%x SINGLE_COMMENT_STATE
+%x MULTI_COMMENT_STATE
 
 %{
 #include<stdio.h>
@@ -20,6 +22,7 @@ int lineCount = 1;
 int errorCount = 0;
 
 int stringLineCount = 0;
+int commentLineCount = 0;
 
 FILE *logFile;
 FILE *tokenFile;
@@ -29,6 +32,8 @@ string logFileText = "";
 
 string stringLiterals = "";
 string stringTokenValue = "";
+
+string commentLiteral = "";
 
 string originalString = "";
 
@@ -88,6 +93,8 @@ NEW_LINE [\n]
 
 	if (symbolTable->insert(foundToken, "CONST_INT")) {
 		logFileText += symbolTable->printAllScopeTable();
+	} else {
+		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
 }
 
@@ -101,6 +108,8 @@ NEW_LINE [\n]
 
 	if (symbolTable->insert(foundToken, "CONST_FLOAT")) {
 		logFileText += symbolTable->printAllScopeTable();
+	} else {
+		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
 }
 
@@ -117,6 +126,8 @@ NEW_LINE [\n]
 
 	if (symbolTable->insert(foundToken, "CONST_CHAR")) {
 		logFileText += symbolTable->printAllScopeTable();
+	} else {
+		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
 }
 
@@ -204,6 +215,18 @@ NEW_LINE [\n]
 	originalString += foundToken;
 }
 
+"//" {
+	cout << "Comment found" << endl;
+	commentLiteral += yytext;
+	BEGIN SINGLE_COMMENT_STATE;
+}
+
+\/\* {
+	cout << "Multi line comment started" << endl;
+	commentLiteral += yytext;
+	BEGIN MULTI_COMMENT_STATE;
+}
+
 {IDENTIFIERS} {
 	string foundToken = yytext;
 
@@ -213,6 +236,58 @@ NEW_LINE [\n]
 
 	if (symbolTable->insert(foundToken, "ID")) {
 		logFileText += symbolTable->printAllScopeTable();
+	} else {
+		logFileText += foundToken + " already exists in current ScopeTable\n\n";
+	}
+}
+
+<SINGLE_COMMENT_STATE>{
+	\n {
+		cout << "Comment end" << endl;
+		commentLineCount++;
+
+		logFileText += "Line no " + to_string(lineCount) + ":" + " Token <COMMENT> " + "Lexeme " + commentLiteral + " found.\n\n";
+
+		BEGIN INITIAL;
+		commentLiteral = "";
+		lineCount += commentLineCount;
+		commentLineCount = 0;
+	}
+	\\\n {
+		cout << "New line in comment" << endl;
+		commentLineCount++;
+		string foundToken = yytext;
+		commentLiteral += foundToken;
+	}
+	. {
+		string foundToken = yytext;
+		commentLiteral += foundToken;
+	}
+}
+
+<MULTI_COMMENT_STATE>{
+	\*\/ {
+		cout << "Multi line comment end" << endl;
+
+		string foundToken = yytext;
+		commentLiteral += foundToken;
+
+		logFileText += "Line no " + to_string(lineCount) + ":" + " Token <COMMENT> " + "Lexeme " + commentLiteral + " found.\n\n";
+
+		BEGIN INITIAL;
+		commentLiteral = "";
+		lineCount += commentLineCount;
+		commentLineCount = 0;
+	}
+
+	\n {
+		commentLineCount++;
+		string foundToken = yytext;
+		commentLiteral += foundToken;
+	}
+	. {
+		string foundToken = yytext;
+		commentLiteral += foundToken;
 	}
 }
 
