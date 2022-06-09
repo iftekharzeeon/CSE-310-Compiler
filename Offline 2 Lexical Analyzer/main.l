@@ -1,5 +1,7 @@
 %option noyywrap
 
+%x STRING_STATE
+
 %{
 #include<stdio.h>
 #include<cstring>
@@ -17,11 +19,18 @@ SymbolTable* symbolTable = new SymbolTable(BUCKET_SIZE);
 int lineCount = 1;
 int errorCount = 0;
 
+int stringLineCount = 0;
+
 FILE *logFile;
 FILE *tokenFile;
 
 string tokens = "";
 string logFileText = "";
+
+string stringLiterals = "";
+string stringTokenValue = "";
+
+string originalString = "";
 
 string to_upper(char *str) {
 	char* temp = str;
@@ -33,6 +42,8 @@ string to_upper(char *str) {
 }
 
 %}
+
+WHITESPACE [ \t\v]
 
 KEYWORDS "if"|"for"|"do"|"int"|"float"|"void"|"switch"|"default"|"else"|"while"|"break"|"char"|"double"|"return"|"case"|"continue"
 
@@ -53,6 +64,9 @@ IDENTIFIERS {ALPHABET_}({DIGITS}|{ALPHABET_})*
 NEW_LINE [\n]
 
 %%
+
+{WHITESPACE} {}
+
 {KEYWORDS} {
 	char* foundToken = new char[yyleng];
 	strcpy(foundToken, yytext);
@@ -181,6 +195,15 @@ NEW_LINE [\n]
 
 }
 
+\" {
+	BEGIN STRING_STATE;
+	cout << "Starting string" << endl;
+
+	string foundToken = yytext;
+	stringLiterals += foundToken;
+	originalString += foundToken;
+}
+
 {IDENTIFIERS} {
 	string foundToken = yytext;
 
@@ -193,9 +216,66 @@ NEW_LINE [\n]
 	}
 }
 
+<STRING_STATE>{
+	\" {
+		cout << "Ending string" << endl;
+
+		string foundToken = yytext;
+		stringLiterals += foundToken;
+		originalString += foundToken;
+
+		string newToken = "<STRING," + originalString + "> ";
+		tokens += newToken;
+		logFileText += "Line no " + to_string(lineCount) + ":" + " Token <STRING> " + "Lexeme " + stringLiterals + " found. --> " + newToken + " \n\n";
+
+		BEGIN INITIAL;
+		stringLiterals = "";
+		originalString = "";
+		lineCount += stringLineCount;
+		stringLineCount = 0;
+	}
+
+	\\\" {
+		cout << "\" occured inside string" << endl;
+		originalString += yytext[1];
+		stringLiterals += yytext;
+
+	}
+	\\ {
+		cout << "New Line with \\ found" << endl;
+		string foundToken = yytext;
+		stringLiterals += foundToken;
+	}
+
+	\\{ALPHABET} {
+		cout << "Spcial character found" << endl;
+		string foundToken = yytext;
+		stringLiterals += foundToken;
+
+		char c = yytext[1];
+		if (c == 't') {
+			originalString += "\t";
+		} else if (c == 'n') {
+			originalString += "\n";
+		} else if (c == 'v') {
+			originalString += "\v";
+		}
+	}
+	{NEW_LINE} {
+		stringLiterals += yytext;
+		stringLineCount++;
+	}
+	. {
+		stringLiterals += yytext;
+		originalString += yytext;
+	}
+}
+
+
 {NEW_LINE} {
 	lineCount++;
 }
+
 
 . {}
 

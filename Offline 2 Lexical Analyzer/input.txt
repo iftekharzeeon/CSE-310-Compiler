@@ -1,17 +1,9 @@
 int main(){
-	int a,b;
-	a=a+1;
-	b = 3.14115E-10;
-	char ch='a';
-	b++;
-	a--;
-	ch='\t';
 	char c[]="ab\td";
+	test = "Hello world \" yes please \""
 	printf("abc\
 def\
 ghi");
-// a comment
-/** another
-*** comment ***/
-	return 0;
+	test1 = "Testing a string with new line \n
+does this work?"
 }	
