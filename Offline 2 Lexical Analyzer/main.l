@@ -58,15 +58,29 @@ DIGITS {DIGIT}+
 ALPHABET [A-Za-z]
 ALPHABET_ {ALPHABET}|_
 
-FLOAT_NUMBER {DIGITS}?(\.{DIGITS})(E[+-]?{DIGITS})?
+FLOAT_NUMBER {DIGITS}?(\.{DIGITS})(E[-]?{DIGITS})?
 
 CHARACTER '{ALPHABET}'
+
+SPECIAL_CHARACTER '\\n'|'\\t'|'\\\\'|'\''|'\a'|'\f'|'\r'|'\b'|'\v'|'\0'
 
 OPERATORS "+"|"-"|"="|"*"|"/"|"%"|"++"|"--"|"<"|"<="|">"|">="|"=="|"!="|"&&"|"||"|"!"|"("|")"|"{"|"}"|"["|"]"|","|";"
 
 IDENTIFIERS {ALPHABET_}({DIGITS}|{ALPHABET_})*
 
 NEW_LINE [\n]
+
+MULTICHARACTER '{ALPHABET}{ALPHABET}+'
+
+EMPTYCHARACTER ''
+
+INVALIDIDENTIFIER ({DIGITS}+|{FLOAT_NUMBER}+){ALPHABET_}+
+
+TOOMANYDECIMAL {FLOAT_NUMBER}(\.)({FLOAT_NUMBER}|{DIGITS})*
+
+ILLFORMEDNUMBER {DIGITS}?E{DIGIT}*\.{DIGIT}*
+
+UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
 
 %%
 
@@ -120,6 +134,26 @@ NEW_LINE [\n]
 
 	string newToken = "<CONST_CHAR,";
 	newToken += characterFound;
+	newToken += "> ";
+	tokens += newToken;
+	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_CHAR> " + "Lexeme " + yytext + " found --> " + newToken + "\n\n";
+
+	if (symbolTable->insert(foundToken, "CONST_CHAR")) {
+		logFileText += symbolTable->printAllScopeTable();
+	} else {
+		logFileText += foundToken + " already exists in current ScopeTable\n\n";
+	}
+}
+
+{SPECIAL_CHARACTER} {
+	string foundToken = yytext;
+
+	char characterFound1 = yytext[1];
+	char characterFound2 = yytext[2];
+
+	string newToken = "<CONST_CHAR,";
+	newToken += characterFound1;
+	newToken += characterFound2;
 	newToken += "> ";
 	tokens += newToken;
 	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_CHAR> " + "Lexeme " + yytext + " found --> " + newToken + "\n\n";
@@ -241,6 +275,54 @@ NEW_LINE [\n]
 	}
 }
 
+{MULTICHARACTER} {
+	string foundToken = yytext;
+
+	logFileText += "Error at line no " + to_string(lineCount) + ": Multi character error " + foundToken + "\n\n";
+
+	errorCount++;
+}
+
+{EMPTYCHARACTER} {
+	string foundToken = yytext;
+
+	logFileText += "Error at line no " + to_string(lineCount) + ": Empty character constant error " + foundToken + "\n\n";
+
+	errorCount++;
+}
+
+{INVALIDIDENTIFIER} {
+	string foundToken = yytext;
+
+	logFileText += "Error at line no " + to_string(lineCount) + ": Invalid prefix on ID or invalid suffix on Number " + foundToken + "\n\n";
+
+	errorCount++;
+}
+
+{TOOMANYDECIMAL} {
+	string foundToken = yytext;
+
+	logFileText += "Error at line no " + to_string(lineCount) + ": Too many decimal points " + foundToken + "\n\n";
+
+	errorCount++;
+}
+
+{ILLFORMEDNUMBER} {
+	string foundToken = yytext;
+
+	logFileText += "Error at line no " + to_string(lineCount) + ": Ill formed number " + foundToken + "\n\n";
+
+	errorCount++;
+}
+
+{UNFINISHEDCHARACTER} {
+	string foundToken = yytext;
+
+	logFileText += "Error at line no " + to_string(lineCount) + ": Unterminated character " + foundToken + "\n\n";
+
+	errorCount++;
+}
+
 <SINGLE_COMMENT_STATE>{
 	\n {
 		cout << "Comment end" << endl;
@@ -285,6 +367,20 @@ NEW_LINE [\n]
 		string foundToken = yytext;
 		commentLiteral += foundToken;
 	}
+
+	<<EOF>> {
+		cout << "Unfinished " << endl;
+
+		logFileText += "Error at line no " + to_string(lineCount) + ": Unterminated Comment " + commentLiteral + "\n\n";
+		
+		errorCount++;
+
+		BEGIN INITIAL;
+		commentLiteral = "";
+		lineCount += commentLineCount;
+		commentLineCount = 0;
+	}
+
 	. {
 		string foundToken = yytext;
 		commentLiteral += foundToken;
@@ -316,8 +412,9 @@ NEW_LINE [\n]
 		stringLiterals += yytext;
 
 	}
-	\\ {
+	\\\n {
 		cout << "New Line with \\ found" << endl;
+		stringLineCount++;
 		string foundToken = yytext;
 		stringLiterals += foundToken;
 	}
@@ -337,8 +434,15 @@ NEW_LINE [\n]
 		}
 	}
 	{NEW_LINE} {
-		stringLiterals += yytext;
-		stringLineCount++;
+		lineCount += stringLineCount;
+		
+		errorCount++;
+		logFileText += "Error at line no " + to_string(lineCount) + ": Unterminated String " + stringLiterals + "\n\n";
+
+		BEGIN INITIAL;
+		stringLiterals = "";
+		originalString = "";
+		stringLineCount = 0;
 	}
 	. {
 		stringLiterals += yytext;
@@ -352,7 +456,13 @@ NEW_LINE [\n]
 }
 
 
-. {}
+. {
+	string foundToken = yytext;
+
+	logFileText += "Error at line no " + to_string(lineCount) + ": Unrecognized character " + foundToken + "\n\n";
+
+	errorCount++;
+}
 
 %%
 
