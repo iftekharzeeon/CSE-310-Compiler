@@ -1,0 +1,9 @@
+int main(){
+	char c[]="ab\td";
+	test = "Hello world \" yes please \""
+	printf("abc\
+def\
+ghi");
+	test1 = "Testing a string with new line \n
+does this work?"
+}	

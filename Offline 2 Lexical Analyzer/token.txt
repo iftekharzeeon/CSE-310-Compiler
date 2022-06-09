@@ -1,0 +1,2 @@
+<INT> <ID,main> <LAPREN,(> <RPAREN,)> <LCURL,{> <CHAR> <ID,c> <LTHIRD,[> <RTHIRD,]> <ASSIGNOP,=> <STRING,"ab	d"> <SEMICOLON,;> <ID,test> <ASSIGNOP,=> <STRING,"Hello world " yes please ""> <ID,printf> <LAPREN,(> <STRING,"abcdefghi"> <RPAREN,)> <SEMICOLON,;> <ID,test1> <ASSIGNOP,=> <STRING,"Testing a string with new line 
+does this work?"> <RCURL,}> 
