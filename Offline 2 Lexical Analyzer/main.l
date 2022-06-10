@@ -48,7 +48,7 @@ string to_upper(char *str) {
 
 %}
 
-WHITESPACE [ \t\v]
+WHITESPACE [ \t\v]+
 
 KEYWORDS "if"|"for"|"do"|"int"|"float"|"void"|"switch"|"default"|"else"|"while"|"break"|"char"|"double"|"return"|"case"|"continue"
 
@@ -58,9 +58,9 @@ DIGITS {DIGIT}+
 ALPHABET [A-Za-z]
 ALPHABET_ {ALPHABET}|_
 
-FLOAT_NUMBER {DIGITS}?(\.{DIGITS})(E[-]?{DIGITS})?
+FLOAT_NUMBER {DIGITS}?(\.{DIGITS})?([Ee][-]?{DIGITS})?
 
-CHARACTER '{ALPHABET}'
+CHARACTER '[ -~]{-}[\\\']'
 
 SPECIAL_CHARACTER '\\n'|'\\t'|'\\\\'|'\\\''|'\\a'|'\\f'|'\\r'|'\\b'|'\\v'|'\\0'
 
@@ -76,7 +76,7 @@ EMPTYCHARACTER ''
 
 INVALIDIDENTIFIER ({DIGITS}+|{FLOAT_NUMBER}+){ALPHABET_}+
 
-TOOMANYDECIMAL {FLOAT_NUMBER}(\.)({FLOAT_NUMBER}|{DIGITS})*
+TOOMANYDECIMAL {FLOAT_NUMBER}(\.){FLOAT_NUMBER}(\.)({FLOAT_NUMBER})*
 
 ILLFORMEDNUMBER {DIGITS}?E{DIGIT}*\.{DIGIT}*
 
@@ -121,7 +121,7 @@ UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_FLOAT> " + "Lexeme " + yytext + " found\n\n";
 
 	if (symbolTable->insert(foundToken, "CONST_FLOAT")) {
-		// logFileText += symbolTable->printAllScopeTable();
+		logFileText += symbolTable->printAllScopeTable();
 	} else {
 		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
@@ -139,7 +139,7 @@ UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_CHAR> " + "Lexeme " + yytext + " found --> " + newToken + "\n\n";
 
 	if (symbolTable->insert(foundToken, "CONST_CHAR")) {
-		// logFileText += symbolTable->printAllScopeTable();
+		logFileText += symbolTable->printAllScopeTable();
 	} else {
 		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
@@ -181,7 +181,7 @@ UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_CHAR> " + "Lexeme " + yytext + " found --> " + newToken + "\n\n";
 
 	if (symbolTable->insert(foundToken, "CONST_CHAR")) {
-		// logFileText += symbolTable->printAllScopeTable();
+		logFileText += symbolTable->printAllScopeTable();
 	} else {
 		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
@@ -291,7 +291,7 @@ UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <ID> " + "Lexeme " + yytext + " found\n\n";
 
 	if (symbolTable->insert(foundToken, "ID")) {
-		// logFileText += symbolTable->printAllScopeTable();
+		logFileText += symbolTable->printAllScopeTable();
 	} else {
 		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
@@ -453,6 +453,18 @@ UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 			originalString += "\n";
 		} else if (c == 'v') {
 			originalString += "\v";
+		} else if (c == 'r') {
+			originalString += "\r";
+		} else if (c == 'b') {
+			originalString += "\b";
+		} else if (c == 'f') {
+			originalString += "\f";
+		} else if (c == '\\') {
+			originalString += "\\";
+		} else if (c == '0') {
+			originalString += '\0';
+		} else {
+			originalString += foundToken;
 		}
 	}
 	{NEW_LINE} {
