@@ -1,14 +1,8 @@
 int main(){
-	'AB;
-	`
 	int a,b;
 	a=a+1;
-	C = 12.34E
-	D = E8
-	12abcd
-	1.2.345E
 	char ch='a';
-	ch=' ';
+	ch='\t';
 	char c[]="ab\td";
 	printf("abc\
 def\
@@ -16,6 +10,5 @@ ghi");
 // a comment
 /** another
 *** comment ***/
-/*unifshed
 	return 0;
 }	

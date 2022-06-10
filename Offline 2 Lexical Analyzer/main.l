@@ -62,7 +62,7 @@ FLOAT_NUMBER {DIGITS}?(\.{DIGITS})(E[-]?{DIGITS})?
 
 CHARACTER '{ALPHABET}'
 
-SPECIAL_CHARACTER '\\n'|'\\t'|'\\\\'|'\''|'\a'|'\f'|'\r'|'\b'|'\v'|'\0'
+SPECIAL_CHARACTER '\\n'|'\\t'|'\\\\'|'\\\''|'\\a'|'\\f'|'\\r'|'\\b'|'\\v'|'\\0'
 
 OPERATORS "+"|"-"|"="|"*"|"/"|"%"|"++"|"--"|"<"|"<="|">"|">="|"=="|"!="|"&&"|"||"|"!"|"("|")"|"{"|"}"|"["|"]"|","|";"
 
@@ -70,7 +70,7 @@ IDENTIFIERS {ALPHABET_}({DIGITS}|{ALPHABET_})*
 
 NEW_LINE [\n]
 
-MULTICHARACTER '{ALPHABET}{ALPHABET}+'
+MULTICHARACTER '([ -~][ -~]+)'
 
 EMPTYCHARACTER ''
 
@@ -80,7 +80,7 @@ TOOMANYDECIMAL {FLOAT_NUMBER}(\.)({FLOAT_NUMBER}|{DIGITS})*
 
 ILLFORMEDNUMBER {DIGITS}?E{DIGIT}*\.{DIGIT}*
 
-UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
+UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 
 %%
 
@@ -101,12 +101,12 @@ UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
 
 	string foundToken = yytext;
 
-	string newToken = "<CONST_INT," + foundToken + "> ";
+	string newToken = "<CONST_INT, " + foundToken + "> ";
 	tokens += newToken;
 	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_INT> " + "Lexeme " + yytext + " found\n\n";
 
 	if (symbolTable->insert(foundToken, "CONST_INT")) {
-		logFileText += symbolTable->printAllScopeTable();
+		// logFileText += symbolTable->printAllScopeTable();
 	} else {
 		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
@@ -116,12 +116,12 @@ UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
 	//CONST_FLOAT tokens
 	string foundToken = yytext;
 
-	string newToken = "<CONST_FLOAT," + foundToken + "> ";
+	string newToken = "<CONST_FLOAT, " + foundToken + "> ";
 	tokens += newToken;
 	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_FLOAT> " + "Lexeme " + yytext + " found\n\n";
 
 	if (symbolTable->insert(foundToken, "CONST_FLOAT")) {
-		logFileText += symbolTable->printAllScopeTable();
+		// logFileText += symbolTable->printAllScopeTable();
 	} else {
 		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
@@ -132,14 +132,14 @@ UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
 
 	char characterFound = yytext[1];
 
-	string newToken = "<CONST_CHAR,";
+	string newToken = "<CONST_CHAR, ";
 	newToken += characterFound;
 	newToken += "> ";
 	tokens += newToken;
 	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_CHAR> " + "Lexeme " + yytext + " found --> " + newToken + "\n\n";
 
 	if (symbolTable->insert(foundToken, "CONST_CHAR")) {
-		logFileText += symbolTable->printAllScopeTable();
+		// logFileText += symbolTable->printAllScopeTable();
 	} else {
 		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
@@ -148,18 +148,40 @@ UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
 {SPECIAL_CHARACTER} {
 	string foundToken = yytext;
 
+	string specialSymbol = 	foundToken.substr(1, 2);
+
+	string newToken = "";
+
 	char characterFound1 = yytext[1];
 	char characterFound2 = yytext[2];
 
-	string newToken = "<CONST_CHAR,";
-	newToken += characterFound1;
-	newToken += characterFound2;
-	newToken += "> ";
+	if (characterFound2 == 't') {
+		newToken = "<CONST_CHAR,\t > ";
+	} else if (characterFound2 == 'n') {
+		newToken = "<CONST_CHAR, \n > ";
+	} else if (characterFound2 == '\\') {
+		newToken = "<CONST_CHAR,\\ > ";
+	} else if (characterFound2 == '\'') {
+		newToken = "<CONST_CHAR,' > ";
+	} else if (characterFound2 == 'a') {
+		newToken = "<CONST_CHAR,\a > ";
+	} else if (characterFound2 == 'f') {
+		newToken = "<CONST_CHAR,\f > ";
+	} else if (characterFound2 == 'r') {
+		newToken = "<CONST_CHAR,\r > ";
+	} else if (characterFound2 == 'b') {
+		newToken = "<CONST_CHAR,\b > ";
+	} else if (characterFound2 == 'v') {
+		newToken = "<CONST_CHAR,\v > ";
+	} else if (characterFound2 == '0') {
+		newToken = "<CONST_CHAR,\0 > ";
+	}
+
 	tokens += newToken;
 	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_CHAR> " + "Lexeme " + yytext + " found --> " + newToken + "\n\n";
 
 	if (symbolTable->insert(foundToken, "CONST_CHAR")) {
-		logFileText += symbolTable->printAllScopeTable();
+		// logFileText += symbolTable->printAllScopeTable();
 	} else {
 		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
@@ -172,64 +194,64 @@ UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
 	string tokenType;
 
 	if (foundToken == "+" || foundToken == "-") {
-		newToken = "<ADDOP," + foundToken + "> ";
+		newToken = "<ADDOP, " + foundToken + "> ";
 		tokenType = "<ADDOP> ";
 
 	} else if (foundToken == "++" || foundToken == "--") {
-		newToken = "<INCOP," + foundToken + "> ";
+		newToken = "<INCOP, " + foundToken + "> ";
 		tokenType = "<INCOP> ";
 	} else if (foundToken == "*" || foundToken == "/" || foundToken == "%") {
-		newToken = "<MULOP," + foundToken + "> ";
+		newToken = "<MULOP, " + foundToken + "> ";
 		tokenType = "<MULOP> ";
 
 	} else if (foundToken == "<" || foundToken == "<=" || foundToken == ">" || foundToken == ">=" || foundToken == "==" || foundToken == "!=") {
-		newToken = "<RELOP," + foundToken + "> ";
+		newToken = "<RELOP, " + foundToken + "> ";
 		tokenType = "<RELOP> ";
 
 	} else if (foundToken == "=") {
-		newToken = "<ASSIGNOP," + foundToken + "> ";
+		newToken = "<ASSIGNOP, " + foundToken + "> ";
 		tokenType = "<ASSIGNOP> ";
 
 	} else if (foundToken == "&&" || foundToken == "||") {
-		newToken = "<LOGICOP," + foundToken + "> ";
+		newToken = "<LOGICOP, " + foundToken + "> ";
 		tokenType = "<LOGICOP> ";
 
 	} else if (foundToken == "!") {
-		newToken = "<NOTOP," + foundToken + "> ";
+		newToken = "<NOTOP, " + foundToken + "> ";
 		tokenType = "<NOTOP> ";
 
 	} else if (foundToken == "(") {
-		newToken = "<LAPREN," + foundToken + "> ";
-		tokenType = "<LAPREN> ";
+		newToken = "<LPAREN, " + foundToken + "> ";
+		tokenType = "<LPAREN> ";
 		
 	} else if (foundToken == ")") {
-		newToken = "<RPAREN," + foundToken + "> ";
+		newToken = "<RPAREN, " + foundToken + "> ";
 		tokenType = "<RPAREN> ";
 
 	} else if (foundToken == "{") {
 		symbolTable->enterNewScope(BUCKET_SIZE);
-		newToken = "<LCURL," + foundToken + "> ";
+		newToken = "<LCURL, " + foundToken + "> ";
 		tokenType = "<LCURL> ";
 		
 	} else if (foundToken == "}") {
 		symbolTable->exitCurrentScope();
-		newToken = "<RCURL," + foundToken + "> ";
+		newToken = "<RCURL, " + foundToken + "> ";
 		tokenType = "<RCURL> ";
 
 	} else if (foundToken == "[") {
-		newToken = "<LTHIRD," + foundToken + "> ";
+		newToken = "<LTHIRD, " + foundToken + "> ";
 		tokenType = "<LTHIRD> ";
 
 	} else if (foundToken == "]") {
-		newToken = "<RTHIRD," + foundToken + "> ";
+		newToken = "<RTHIRD, " + foundToken + "> ";
 		tokenType = "<RTHIRD> ";
 
 	} else if (foundToken == ",") {
-		newToken = "<COMMA," + foundToken + "> ";
+		newToken = "<COMMA, " + foundToken + "> ";
 		tokenType = "<COMMA> ";
 
 	} else if (foundToken == ";") {
-		newToken = "<SEMICOLON," + foundToken + "> ";
+		newToken = "<SEMICOLON, " + foundToken + "> ";
 		tokenType = "<SEMICOLON> ";
 
 	}
@@ -264,12 +286,12 @@ UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
 {IDENTIFIERS} {
 	string foundToken = yytext;
 
-	string newToken = "<ID," + foundToken + "> ";
+	string newToken = "<ID, " + foundToken + "> ";
 	tokens += newToken;
 	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <ID> " + "Lexeme " + yytext + " found\n\n";
 
 	if (symbolTable->insert(foundToken, "ID")) {
-		logFileText += symbolTable->printAllScopeTable();
+		// logFileText += symbolTable->printAllScopeTable();
 	} else {
 		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
@@ -278,7 +300,7 @@ UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
 {MULTICHARACTER} {
 	string foundToken = yytext;
 
-	logFileText += "Error at line no " + to_string(lineCount) + ": Multi character error " + foundToken + "\n\n";
+	logFileText += "Error at line no " + to_string(lineCount) + ": Multi character constant error " + foundToken + "\n\n";
 
 	errorCount++;
 }
@@ -328,7 +350,7 @@ UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
 		cout << "Comment end" << endl;
 		commentLineCount++;
 
-		logFileText += "Line no " + to_string(lineCount) + ":" + " Token <COMMENT> " + "Lexeme " + commentLiteral + " found.\n\n";
+		logFileText += "Line no " + to_string(lineCount) + ":" + " Token <COMMENT> " + "Lexeme " + commentLiteral + " found\n\n";
 
 		BEGIN INITIAL;
 		commentLiteral = "";
@@ -354,7 +376,7 @@ UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
 		string foundToken = yytext;
 		commentLiteral += foundToken;
 
-		logFileText += "Line no " + to_string(lineCount) + ":" + " Token <COMMENT> " + "Lexeme " + commentLiteral + " found.\n\n";
+		logFileText += "Line no " + to_string(lineCount) + ":" + " Token <COMMENT> " + "Lexeme " + commentLiteral + " found\n\n";
 
 		BEGIN INITIAL;
 		commentLiteral = "";
@@ -395,9 +417,9 @@ UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
 		stringLiterals += foundToken;
 		originalString += foundToken;
 
-		string newToken = "<STRING," + originalString + "> ";
+		string newToken = "<STRING, " + originalString + "> ";
 		tokens += newToken;
-		logFileText += "Line no " + to_string(lineCount) + ":" + " Token <STRING> " + "Lexeme " + stringLiterals + " found. --> " + newToken + " \n\n";
+		logFileText += "Line no " + to_string(lineCount) + ":" + " Token <STRING> " + "Lexeme " + stringLiterals + " found --> " + newToken + "\n\n";
 
 		BEGIN INITIAL;
 		stringLiterals = "";
@@ -434,14 +456,15 @@ UNFINISHEDCHARACTER '([ -`]{-}[\'])*|'\\'
 		}
 	}
 	{NEW_LINE} {
-		lineCount += stringLineCount;
 		
+		stringLineCount++;
 		errorCount++;
 		logFileText += "Error at line no " + to_string(lineCount) + ": Unterminated String " + stringLiterals + "\n\n";
 
 		BEGIN INITIAL;
 		stringLiterals = "";
 		originalString = "";
+		lineCount += stringLineCount;
 		stringLineCount = 0;
 	}
 	. {
