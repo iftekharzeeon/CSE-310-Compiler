@@ -78,7 +78,7 @@ INVALIDIDENTIFIER ({DIGITS}+|{FLOAT_NUMBER}+){ALPHABET_}+
 
 TOOMANYDECIMAL {FLOAT_NUMBER}(\.){FLOAT_NUMBER}(\.)({FLOAT_NUMBER})*
 
-ILLFORMEDNUMBER {DIGITS}?E{DIGIT}*\.{DIGIT}*
+ILLFORMEDNUMBER {DIGITS}?E{DIGIT}*\.{DIGIT}*|{DIGITS}\.
 
 UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 
@@ -106,7 +106,7 @@ UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 	logFileText += "Line no " + to_string(lineCount) + ":" + " Token <CONST_INT> " + "Lexeme " + yytext + " found\n\n";
 
 	if (symbolTable->insert(foundToken, "CONST_INT")) {
-		// logFileText += symbolTable->printAllScopeTable();
+		logFileText += symbolTable->printAllScopeTable();
 	} else {
 		logFileText += foundToken + " already exists in current ScopeTable\n\n";
 	}
@@ -522,6 +522,8 @@ int main(int argc,char *argv[]){
 
 	string lineCountText = "Total lines: " + to_string(lineCount) + "\n";
 	string errorCountText = "Total errors: " + to_string(errorCount) + "\n";
+
+	logFileText += symbolTable->printAllScopeTable();
 
 	fprintf(tokenFile, "%s", tokens.c_str());
 	fprintf(logFile, "%s", logFileText.c_str());

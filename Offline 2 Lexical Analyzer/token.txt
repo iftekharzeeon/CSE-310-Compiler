@@ -1,1 +1,0 @@
-<ID, string> <ID, a> <ASSIGNOP, => <STRING, "fvnljs\Adad"> <SEMICOLON, ;> 

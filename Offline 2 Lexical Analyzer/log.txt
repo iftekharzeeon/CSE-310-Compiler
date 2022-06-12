@@ -1,19 +1,6 @@
-Line no 1: Token <ID> Lexeme string found
+Error at line no 1: Ill formed number 11.
 
 ScopeTable# 1
-3 --> <string : ID> 
-
-Line no 1: Token <ID> Lexeme a found
-
-ScopeTable# 1
-3 --> <string : ID> 
-6 --> <a : ID> 
-
-Line no 1: Token <ASSIGNOP> Lexeme = found
-
-Line no 1: Token <STRING> Lexeme "fvnljs\Adad" found --> <STRING, "fvnljs\Adad"> 
-
-Line no 1: Token <SEMICOLON> Lexeme ; found
 
 Total lines: 1
-Total errors: 0
+Total errors: 1
