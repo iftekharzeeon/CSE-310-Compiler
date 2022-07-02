@@ -21,9 +21,6 @@ int errorCount = 0;
 int stringLineCount = 0;
 int commentLineCount = 0;
 
-FILE *logFile;
-FILE *tokenFile;
-
 string tokens = "";
 string logFileText = "";
 
@@ -226,11 +223,11 @@ UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 
 	} else if (foundToken == "{") {
 		
+		symbolTable->enterNewScope(7);
 
 		return LCURL;
 		
 	} else if (foundToken == "}") {
-		
 
 		return RCURL;
 
@@ -256,7 +253,7 @@ UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 {IDENTIFIERS} {
 	string foundToken = yytext;
 	
-	SymbolInfo *newSymbolInfo = new SymbolInfo(foundToken, "RELOP");
+	SymbolInfo *newSymbolInfo = new SymbolInfo(foundToken, "ID");
 	yylval.symbolInfo = newSymbolInfo;
 	return ID;
 }
