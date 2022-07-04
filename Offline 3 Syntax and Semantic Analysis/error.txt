@@ -1,0 +1,4 @@
+Error at line 2: Multiple declaration of b
+
+Error at line 10: Multiple declaration of c
+

@@ -16,12 +16,14 @@ private:
     string name;
     string type;
     SymbolInfo *next;
+    int isDefined;
 public:
     SymbolInfo()
     {
         this->name = "";
         this->type = "";
         this->next = nullptr;
+        this->isDefined = 0; // The symbol is not defined yet
 
     }
 
@@ -30,6 +32,7 @@ public:
         this->name = name;
         this->type = type;
         this-> next = nullptr;
+        this->isDefined = 0;
     }
 
     string getName()
@@ -60,6 +63,14 @@ public:
     void setNextObj(SymbolInfo *nextObj)
     {
         this->next = nextObj;
+    }
+
+    int getIsDefined() {
+        return this->isDefined;
+    }
+
+    void setIsDefined(int isDefined) {
+        this->isDefined = isDefined;
     }
 
     ~SymbolInfo()

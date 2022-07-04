@@ -21,8 +21,8 @@ int errorCount = 0;
 int stringLineCount = 0;
 int commentLineCount = 0;
 
-string tokens = "";
 string logFileText = "";
+string errorFileText = "";
 
 string stringLiterals = "";
 string stringTokenValue = "";
@@ -222,8 +222,6 @@ UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 		return RPAREN;
 
 	} else if (foundToken == "{") {
-		
-		symbolTable->enterNewScope(7);
 
 		return LCURL;
 		
