@@ -1,5 +1,6 @@
 %{
 #include<iostream>
+#include<bits/stdc++.h>
 #include<cstdlib>
 #include<cstring>
 #include<cmath>
@@ -20,6 +21,8 @@ SymbolTable *symbolTable = new SymbolTable(7);
 FILE *fp;
 FILE *logFile;
 FILE *errorFile;
+
+vector<SymbolInfo*> parametersList;
 
 void yyerror(char *s)
 {
@@ -49,9 +52,8 @@ void yyerror(char *s)
 %type <symbolInfo> start program unit var_declaration type_specifier declaration_list func_declaration
 %type <symbolInfo> func_definition variable parameter_list
 
-%type <symbolInfo> expression_statement
-%type <symbolInfo> compound_statement statements unary_expression factor statement arguments
-%type <symbolInfo> expression logic_expression simple_expression rel_expression term argument_list
+%type <symbolInfo> expression_statement compound_statement statements unary_expression factor statement
+%type <symbolInfo> expression logic_expression simple_expression rel_expression term arguments argument_list
 
 %left 
 %right
@@ -153,6 +155,8 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 			string output = $1->getName() + " " + $2->getName() + "(" + $4->getName() + ")" + $7->getName();
 			logFileText += "Line " + to_string(lineCount) + ": func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statement\n\n" + output + "\n\n";
 			$$ = new SymbolInfo(output, "func_definition");
+
+			parametersList.clear();
 			
 		}
 		| type_specifier ID LPAREN RPAREN {
@@ -186,6 +190,9 @@ parameter_list  : parameter_list COMMA type_specifier ID {
 					logFileText += "Line " + to_string(lineCount) + ": parameter_list : parameter_list COMMA type_specifier ID\n\n" + $1->getName() + "," + $3->getName() + " " + $4->getName() + "\n\n";
 					$$ = $1;
 					$$->setName($1->getName() + "," + $3->getName() + " " + $4->getName());
+
+					SymbolInfo *s1 = new SymbolInfo($4->getName(), $3->getName());
+					parametersList.push_back(s1);
 				}
 				| parameter_list COMMA type_specifier {
 
@@ -193,6 +200,9 @@ parameter_list  : parameter_list COMMA type_specifier ID {
 				| type_specifier ID {
 					logFileText += "Line " + to_string(lineCount) + ": parameter_list : type_specifier ID\n\n" + $1->getName() + " " + $2->getName() + "\n\n";
 					$$ = new SymbolInfo($1->getName() + " " + $2->getName(), "param_list");
+
+					SymbolInfo *s1 = new SymbolInfo($2->getName(), $1->getName());
+					parametersList.push_back(s1);
 				}
 				| type_specifier {
 					
@@ -204,6 +214,17 @@ compound_statement : LCURL {
 					symbolTable->enterNewScope(7);
 					}
 					statements RCURL {
+					int paramListSize = parametersList.size();
+					while (paramListSize != 0) {
+						SymbolInfo *s1 = parametersList.at(paramListSize-1);
+						if (!symbolTable->insert(s1->getName(), "ID")) {
+							// Error 
+						}
+						delete s1;
+						parametersList.pop_back();
+						paramListSize--;
+						
+					}
 					logFileText += "Line " + to_string(lineCount) + ": compound_statement : LCURL statements RCURL\n\n" + "{\n" + $3->getName() + "\n}\n\n\n";
 					
 					logFileText += symbolTable->printAllScopeTable();
@@ -360,7 +381,7 @@ variable : ID {
 		}
 		;
 	 
-expression : logic_expression	{
+expression : logic_expression {
 					logFileText += "Line " + to_string(lineCount) + ": expression : logic_expression\n\n" + $1->getName() + "\n\n";
 					$$ = $1;
  			}
