@@ -230,11 +230,15 @@ parameter_list  : parameter_list COMMA type_specifier ID {
 compound_statement : LCURL {
 						symbolTable->enterNewScope(7);
 
+
 						int paramListSize = parametersList.size();
 						while (paramListSize != 0) {
 							SymbolInfo *s1 = parametersList.at(paramListSize-1);
 							if (!symbolTable->insert(s1->getName(), "ID")) {
 								// Error 
+								errorCount++;
+								logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
+								errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
 							}
 							parametersList.pop_back();
 							paramListSize--;
@@ -256,7 +260,7 @@ compound_statement : LCURL {
 					symbolTable->enterNewScope(7);
 				}
 				RCURL {
-					logFileText += "Line " + to_string(lineCount) + ": compound_statement : LCURL RCURL\n\n";
+					logFileText += "Line " + to_string(lineCount) + ": compound_statement : LCURL RCURL\n\n{}\n\n";
 					logFileText += symbolTable->printAllScopeTable();
 					symbolTable->exitCurrentScope();
 				}
@@ -375,7 +379,7 @@ statement : var_declaration {
 			$$->setName(output);
 		}
 		| IF LPAREN expression RPAREN statement ELSE statement {
-			string output = "if (" + $3->getName() + ")" + $5->getName() + "else" + $7->getName(); 
+			string output = "if (" + $3->getName() + ")" + $5->getName() + "else\n" + $7->getName(); 
 			logFileText += "Line " + to_string(lineCount) + ": statement : IF LPAREN expression RPAREN statement ELSE statement\n\n" + output + "\n\n";
 			$$ = $7;
 
@@ -402,8 +406,8 @@ statement : var_declaration {
 		;
 	  
 expression_statement : SEMICOLON {
-						logFileText += "Line " + to_string(lineCount) + ": expression_statement : SEMICOLON\n\n" + $$->getName() + ";\n\n";
-						$$->setName($$->getName() + ";");
+						logFileText += "Line " + to_string(lineCount) + ": expression_statement : SEMICOLON\n\n;\n\n";
+						$$->setName(";");
 					}			
 					| expression SEMICOLON {
 						logFileText += "Line " + to_string(lineCount) + ": expression_statement : expression SEMICOLON\n\n" + $1->getName() + ";\n\n";
@@ -493,8 +497,9 @@ expression : logic_expression {
 					typeName = tempSymbolInfo->getDatType();
 					typeName = "CONST_" + typeName;
 
-					if ($3->getType() != "LOGIC_EXPRESSION") {
-						if (typeName != $3->getType()) {
+					if ($3->getType() == "CONST_INT" || $3->getType() == "CONST_FLOAT") {
+						if (typeName == "CONST_INT" && typeName != $3->getType()) {
+							cout << $3->getName() << " " << variableName << " " << $3->getType() << endl;
 							errorCount++;
 							logFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch\n\n";
 							errorFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch\n\n";
@@ -563,12 +568,12 @@ term :	unary_expression {
 unary_expression : ADDOP unary_expression {
 			logFileText += "Line " + to_string(lineCount) + ": unary_expression : ADDOP unary_expression\n\n" + $1->getName() + $2->getName() + "\n\n";
 			$$ = $2;
-			$$->setName($2->getName() + $1->getName() + $2->getName());
+			$$->setName($1->getName() + $2->getName());
 		}  
 		| NOT unary_expression {
 			logFileText += "Line " + to_string(lineCount) + ": unary_expression : NOT unary_expression\n\n" + "!" + $2->getName() + "\n\n";
 			$$ = $2;
-			$$->setName($2->getName() + "!" + $2->getName());
+			$$->setName("!" + $2->getName());
 		}
 		| factor {
 			logFileText += "Line " + to_string(lineCount) + ": unary_expression : factor\n\n" + $1->getName() + "\n\n";
