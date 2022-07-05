@@ -26,6 +26,14 @@ public:
         }
     }
 
+    bool insert(string name, string type, string datType, int varType = 0) {
+        if (currentScopeTable->insert(name, type, datType, varType)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     SymbolInfo* lookUp(string name) {
         ScopeTable *temp = currentScopeTable;
         while (temp != nullptr) {

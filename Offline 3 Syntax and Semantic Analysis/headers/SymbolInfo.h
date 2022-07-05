@@ -16,7 +16,11 @@ private:
     string name;
     string type;
     SymbolInfo *next;
+    string datType;
     int isDefined;
+    int varType; //0-> Function 1-> Variable 2->Array
+
+
 public:
     SymbolInfo()
     {
@@ -24,6 +28,8 @@ public:
         this->type = "";
         this->next = nullptr;
         this->isDefined = 0; // The symbol is not defined yet
+        this->datType = "";
+        this->varType = 0;
 
     }
 
@@ -33,6 +39,28 @@ public:
         this->type = type;
         this-> next = nullptr;
         this->isDefined = 0;
+        this->datType = "";
+        this->varType = 0;
+    }
+
+    SymbolInfo(string name, string type, string datType)
+    {
+        this->name = name;
+        this->type = type;
+        this-> next = nullptr;
+        this->isDefined = 0;
+        this->datType = datType;
+        this->varType = 0;
+    }
+
+    SymbolInfo(string name, string type, string datType, int varType)
+    {
+        this->name = name;
+        this->type = type;
+        this-> next = nullptr;
+        this->isDefined = 0;
+        this->datType = datType;
+        this->varType = varType;
     }
 
     string getName()
@@ -71,6 +99,22 @@ public:
 
     void setIsDefined(int isDefined) {
         this->isDefined = isDefined;
+    }
+
+    string getDatType() {
+        return this->datType;
+    }
+
+    void setDatType(string dataType) {
+        this->datType = dataType;
+    }
+
+    int getVarType() {
+        return this->varType;
+    }
+
+    void setVarType(int varType) {
+        this->varType = varType;
     }
 
     ~SymbolInfo()

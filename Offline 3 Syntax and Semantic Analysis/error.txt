@@ -1,2 +1,24 @@
-Error at line 6: Multiple declaration of c
+Error at line 43: Multiple declaration of a
+
+Error at line 43: Multiple declaration of c
+
+Error at line 48: Type Mismatch, c is an array
+
+Error at line 48: Type Mismatch
+
+Error at line 49: Type Mismatch
+
+Error at line 51: Undeclared variable k
+
+Error at line 52: Type Mismatch, b is an array
+
+Error at line 53: Expression inside third brackets not an integer
+
+Error at line 57: Type Mismatch
+
+Error at line 58: Type Mismatch
+
+Error at line 60: Non-Integer operand on modulus operator
+
+Error at line 62: Type Mismatch
 

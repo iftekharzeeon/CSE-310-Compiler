@@ -23,6 +23,7 @@ FILE *logFile;
 FILE *errorFile;
 
 vector<SymbolInfo*> parametersList;
+string typeName = "";
 
 void yyerror(char *s)
 {
@@ -109,6 +110,8 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON {
 					SymbolInfo *symbolInfo = symbolTable->lookUp($2->getName());
 					if (symbolInfo == nullptr) {
 						symbolTable->insert($2->getName(), $2->getType());
+						symbolInfo = symbolTable->lookUp($2->getName());
+						symbolInfo->setDatType($1->getName());						
 					} else {
 						// Error 
 						errorCount++;
@@ -123,6 +126,8 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON {
 					SymbolInfo *symbolInfo = symbolTable->lookUp($2->getName());
 					if (symbolInfo == nullptr) {
 						symbolTable->insert($2->getName(), $2->getType());
+						symbolInfo = symbolTable->lookUp($2->getName());
+						symbolInfo->setDatType($1->getName());
 					} else {
 						// Error 
 						errorCount++;
@@ -136,8 +141,10 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 			SymbolInfo *symbolInfo = symbolTable->lookUp($2->getName());
 			if (symbolInfo == nullptr) {
 				symbolTable->insert($2->getName(), $2->getType());
+				symbolInfo = symbolTable->lookUp($2->getName());
+				symbolInfo->setDatType($1->getName());
 			} else {
-				
+
 				int isDefined = symbolInfo->getIsDefined();
 
 				if (isDefined == 0) {
@@ -163,6 +170,8 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 			SymbolInfo *symbolInfo = symbolTable->lookUp($2->getName());
 			if (symbolInfo == nullptr) {
 				symbolTable->insert($2->getName(), $2->getType());
+				symbolInfo = symbolTable->lookUp($2->getName());
+				symbolInfo->setDatType($1->getName());
 			} else {
 				
 				int isDefined = symbolInfo->getIsDefined();
@@ -195,36 +204,44 @@ parameter_list  : parameter_list COMMA type_specifier ID {
 					parametersList.push_back(s1);
 				}
 				| parameter_list COMMA type_specifier {
+					logFileText += "Line " + to_string(lineCount) + ": parameter_list : parameter_list COMMA type_specifier\n\n" + $1->getName() + "," + $3->getName() + "\n\n";
+					$$ = new SymbolInfo($1->getName() + "," + $3->getName(), "PARAM_LIST");
 
+					SymbolInfo *s1 = new SymbolInfo("", $3->getName());
+					parametersList.push_back(s1);
 				}
 				| type_specifier ID {
 					logFileText += "Line " + to_string(lineCount) + ": parameter_list : type_specifier ID\n\n" + $1->getName() + " " + $2->getName() + "\n\n";
-					$$ = new SymbolInfo($1->getName() + " " + $2->getName(), "param_list");
+					$$ = new SymbolInfo($1->getName() + " " + $2->getName(), "PARAM_LIST");
 
 					SymbolInfo *s1 = new SymbolInfo($2->getName(), $1->getName());
 					parametersList.push_back(s1);
 				}
 				| type_specifier {
-					
+					logFileText += "Line " + to_string(lineCount) + ": parameter_list : type_specifier\n\n" + $1->getName() + "\n\n";
+					$$ = new SymbolInfo($1->getName(), "PARAM_LIST");
+
+					SymbolInfo *s1 = new SymbolInfo("", $1->getName());
+					parametersList.push_back(s1);
 				}
 				;
 
  		
 compound_statement : LCURL {
-					symbolTable->enterNewScope(7);
+						symbolTable->enterNewScope(7);
+
+						int paramListSize = parametersList.size();
+						while (paramListSize != 0) {
+							SymbolInfo *s1 = parametersList.at(paramListSize-1);
+							if (!symbolTable->insert(s1->getName(), "ID")) {
+								// Error 
+							}
+							parametersList.pop_back();
+							paramListSize--;
+							
+						}
 					}
 					statements RCURL {
-					int paramListSize = parametersList.size();
-					while (paramListSize != 0) {
-						SymbolInfo *s1 = parametersList.at(paramListSize-1);
-						if (!symbolTable->insert(s1->getName(), "ID")) {
-							// Error 
-						}
-						delete s1;
-						parametersList.pop_back();
-						paramListSize--;
-						
-					}
 					logFileText += "Line " + to_string(lineCount) + ": compound_statement : LCURL statements RCURL\n\n" + "{\n" + $3->getName() + "\n}\n\n\n";
 					
 					logFileText += symbolTable->printAllScopeTable();
@@ -239,7 +256,9 @@ compound_statement : LCURL {
 					symbolTable->enterNewScope(7);
 				}
 				RCURL {
-
+					logFileText += "Line " + to_string(lineCount) + ": compound_statement : LCURL RCURL\n\n";
+					logFileText += symbolTable->printAllScopeTable();
+					symbolTable->exitCurrentScope();
 				}
 				;
  		    
@@ -247,6 +266,7 @@ var_declaration : type_specifier declaration_list SEMICOLON {
 					logFileText += "Line " + to_string(lineCount) + ": var_declaration : type_specifier declaration_list SEMICOLON\n\n" + $1->getName() + " " + $2->getName() + ";\n\n";
 					
 					$$ = new SymbolInfo($1->getName() + " " + $2->getName() + ";", "var_declaration");
+					typeName = "";
 
 				}
  				;
@@ -254,20 +274,23 @@ var_declaration : type_specifier declaration_list SEMICOLON {
 type_specifier	: INT {
 					logFileText += "Line " + to_string(lineCount) + ": type_specifier : INT\n\nint\n\n"; 
 					$$ = new SymbolInfo("int", "type_specifier");
+					typeName = "INT";
 				}
  				| FLOAT {
 					logFileText += "Line " + to_string(lineCount) + ": type_specifier : FLOAT\n\nfloat\n\n";
 					$$ = new SymbolInfo("float", "type_specifier");
+					typeName = "FLOAT";
 				}
  				| VOID {
 					logFileText += "Line " + to_string(lineCount) + ": type_specifier : VOID\n\nvoid\n\n";
 					$$ = new SymbolInfo("void", "type_specifier");
+					typeName = "VOID";
 				}
  				;
  		
 declaration_list : declaration_list COMMA ID {
 
-					if (!symbolTable->insert($3->getName(), $3->getType())) {
+					if (!symbolTable->insert($3->getName(), $3->getType(), typeName, 1)) {
 						errorCount++;
 						errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $3->getName() + "\n\n";
 						logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $3->getName() + "\n\n";
@@ -279,7 +302,7 @@ declaration_list : declaration_list COMMA ID {
 
 				}
 				| declaration_list COMMA ID LTHIRD CONST_INT RTHIRD {
-					if (!symbolTable->insert($3->getName(), $3->getType())) {
+					if (!symbolTable->insert($3->getName(), $3->getType(), typeName, 2)) {
 						errorCount++;
 						errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $3->getName() + "\n\n";
 						logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $3->getName() + "\n\n";
@@ -290,7 +313,7 @@ declaration_list : declaration_list COMMA ID {
 					$$ = new SymbolInfo($1->getName() + "," + $3->getName() + "[" + $5->getName() + "]", "declaration_list");
 				}
  		  		| ID {
-					if (!symbolTable->insert($1->getName(), $1->getType())) {
+					if (!symbolTable->insert($1->getName(), $1->getType(), typeName, 1)) {
 						errorCount++;
 						errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $1->getName() + "\n\n";
 						logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $1->getName() + "\n\n";
@@ -302,7 +325,7 @@ declaration_list : declaration_list COMMA ID {
 				}
  		  		| ID LTHIRD CONST_INT RTHIRD {
 
-					if (!symbolTable->insert($1->getName(), $1->getType())) {
+					if (!symbolTable->insert($1->getName(), $1->getType(), typeName, 2)) {
 						errorCount++;
 						errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $1->getName() + "\n\n";
 						logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $1->getName() + "\n\n";
@@ -338,19 +361,37 @@ statement : var_declaration {
 
 		}
 		| FOR LPAREN expression_statement expression_statement expression RPAREN statement {
+			string output = "for (" + $3->getName() + $4->getName() + $5->getName() + ")" + $7->getName(); 
+			logFileText += "Line " + to_string(lineCount) + ": statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement\n\n" + output + "\n\n";
+			$$ = $7;
 
+			$$->setName(output);
 		}
 		| IF LPAREN expression RPAREN statement {
+			string output = "if (" + $3->getName() + ")" + $5->getName(); 
+			logFileText += "Line " + to_string(lineCount) + ": statement : IF LPAREN expression RPAREN statement\n\n" + output + "\n\n";
+			$$ = $5;
 
-
+			$$->setName(output);
 		}
 		| IF LPAREN expression RPAREN statement ELSE statement {
+			string output = "if (" + $3->getName() + ")" + $5->getName() + "else" + $7->getName(); 
+			logFileText += "Line " + to_string(lineCount) + ": statement : IF LPAREN expression RPAREN statement ELSE statement\n\n" + output + "\n\n";
+			$$ = $7;
 
+			$$->setName(output);
 		}
 		| WHILE LPAREN expression RPAREN statement {
+			string output = "while (" + $3->getName() + ")" + $5->getName(); 
+			logFileText += "Line " + to_string(lineCount) + ": statement : WHILE LPAREN expression RPAREN statement\n\n" + output + "\n\n";
+			$$ = $5;
 
+			$$->setName(output);
 		}
 		| PRINTLN LPAREN ID RPAREN SEMICOLON {
+			string output = "printf(" + $3->getName() + ");"; 
+			logFileText += "Line " + to_string(lineCount) + ": statement : PRINTLN LPAREN ID RPAREN SEMICOLON\n\n" + output + "\n\n";
+			$$ = new SymbolInfo(output, "STATEMENT");
 
 		}
 		| RETURN expression SEMICOLON {
@@ -361,7 +402,8 @@ statement : var_declaration {
 		;
 	  
 expression_statement : SEMICOLON {
-
+						logFileText += "Line " + to_string(lineCount) + ": expression_statement : SEMICOLON\n\n" + $$->getName() + ";\n\n";
+						$$->setName($$->getName() + ";");
 					}			
 					| expression SEMICOLON {
 						logFileText += "Line " + to_string(lineCount) + ": expression_statement : expression SEMICOLON\n\n" + $1->getName() + ";\n\n";
@@ -371,13 +413,60 @@ expression_statement : SEMICOLON {
 					;
 	  
 variable : ID {
-			logFileText += "Line " + to_string(lineCount) + ": variable : ID\n\n" + $1->getName() + "\n\n";
+			logFileText += "Line " + to_string(lineCount) + ": variable : ID\n\n";
+
+			SymbolInfo *tempSymbolInfo = symbolTable->lookUp($1->getName());
+
+			if (tempSymbolInfo == nullptr) {
+				errorCount++;
+				logFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $1->getName() + "\n\n";
+				errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $1->getName() + "\n\n";
+
+			} else {
+				int variableType = tempSymbolInfo->getVarType();
+				cout << tempSymbolInfo->getName() << tempSymbolInfo->getVarType() << endl;
+
+				if (variableType == 2) {
+					errorCount++;
+					logFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch, " + $1->getName() + " is an array\n\n";
+					errorFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch, " + $1->getName() + " is an array\n\n";
+				}
+			}
+
+			logFileText += $1->getName() + "\n\n";
+			
 			$$ = $1;
 		}
 		| ID LTHIRD expression RTHIRD 
 		{
-			logFileText += "Line " + to_string(lineCount) + ": variable : ID LTHIRD expression RTHIRD\n\n" + $1->getName() + "[" + $3->getName() + "]" + "\n\n";
-			$$ = new SymbolInfo($1->getName() + "[" + $3->getName() + "]", "variable");
+			logFileText += "Line " + to_string(lineCount) + ": variable : ID LTHIRD expression RTHIRD\n\n";
+
+			if ($3->getType() != "CONST_INT") {
+				errorCount++;
+				logFileText += "Error at line " + to_string(lineCount) + ": Expression inside third brackets not an integer\n\n";
+				errorFileText += "Error at line " + to_string(lineCount) + ": Expression inside third brackets not an integer\n\n";
+			} else {
+				SymbolInfo *tempSymbolInfo = symbolTable->lookUp($1->getName());
+				if (tempSymbolInfo == nullptr) {
+					errorCount++;
+					logFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $1->getName() + "\n\n";
+					errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $1->getName() + "\n\n";
+
+				} else {
+					int variableType = tempSymbolInfo->getVarType();
+
+					if (variableType != 2) {
+						errorCount++;
+						logFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch, " + $1->getName() + " is an array\n\n";
+						errorFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch, " + $1->getName() + " is an array\n\n";
+						}
+				}
+
+			}
+
+			logFileText += $1->getName() + "[" + $3->getName() + "]" + "\n\n";
+
+			$$ = new SymbolInfo($1->getName() + "[" + $3->getName() + "]", "VARIABLE");
 		}
 		;
 	 
@@ -386,7 +475,37 @@ expression : logic_expression {
 					$$ = $1;
  			}
 			| variable ASSIGNOP logic_expression {
-				logFileText += "Line " + to_string(lineCount) + ": expression : variable ASSIGNOP logic_expression\n\n" + $1->getName() + "=" + $3->getName() + "\n\n";
+				string variableName;
+
+				logFileText += "Line " + to_string(lineCount) + ": expression : variable ASSIGNOP logic_expression\n\n";
+
+				if ($1->getType() == "VARIABLE") {
+					int position = $1->getName().find('[');
+					variableName = $1->getName().substr(0,position);
+				} else if($1->getType() == "ID") {
+					variableName = $1->getName();
+				}
+
+				SymbolInfo *tempSymbolInfo = symbolTable->lookUp(variableName);
+
+				if (tempSymbolInfo != nullptr) {
+
+					typeName = tempSymbolInfo->getDatType();
+					typeName = "CONST_" + typeName;
+
+					if ($3->getType() != "LOGIC_EXPRESSION") {
+						if (typeName != $3->getType()) {
+							errorCount++;
+							logFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch\n\n";
+							errorFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch\n\n";
+						}
+					} else {
+
+					}
+				}
+
+				logFileText += $1->getName() + "=" + $3->getName() + "\n\n";
+				typeName = "";
 				$$ = new SymbolInfo($1->getName() + "=" + $3->getName(), "expression");
 			}	
 			;
@@ -397,7 +516,7 @@ logic_expression : rel_expression {
 				}
 				| rel_expression LOGICOP rel_expression {
 					logFileText += "Line " + to_string(lineCount) + ": logic_expression : rel_expression LOGICOP rel_expression\n\n" + $1->getName() + $2->getName() + $3->getName() + "\n\n";
-					$$ = new SymbolInfo($1->getName() + $2->getName() + $3->getName(), "logic_expression");
+					$$ = new SymbolInfo($1->getName() + $2->getName() + $3->getName(), "LOGIC_EXPRESSION");
 				} 	
 				;
 			
@@ -427,17 +546,29 @@ term :	unary_expression {
 		$$ = $1;
 	}
     |  term MULOP unary_expression {
-		logFileText += "Line " + to_string(lineCount) + ": term : term MULOP unary_expression\n\n" + $1->getName() + $2->getName() + $3->getName() + "\n\n";
+		logFileText += "Line " + to_string(lineCount) + ": term : term MULOP unary_expression\n\n";
+
+		if ($2->getName() == "%" && $3->getType() == "CONST_FLOAT") {
+			errorCount++;
+			logFileText += "Error at line " + to_string(lineCount) + ": Non-Integer operand on modulus operator\n\n";
+			errorFileText += "Error at line " + to_string(lineCount) + ": Non-Integer operand on modulus operator\n\n";
+		}
+		
+		logFileText += $1->getName() + $2->getName() + $3->getName() + "\n\n";
 		$$ = $1;
 		$$->setName($1->getName() + $2->getName() + $3->getName());
 	}
     ;
 
 unary_expression : ADDOP unary_expression {
-
+			logFileText += "Line " + to_string(lineCount) + ": unary_expression : ADDOP unary_expression\n\n" + $1->getName() + $2->getName() + "\n\n";
+			$$ = $2;
+			$$->setName($2->getName() + $1->getName() + $2->getName());
 		}  
 		| NOT unary_expression {
-
+			logFileText += "Line " + to_string(lineCount) + ": unary_expression : NOT unary_expression\n\n" + "!" + $2->getName() + "\n\n";
+			$$ = $2;
+			$$->setName($2->getName() + "!" + $2->getName());
 		}
 		| factor {
 			logFileText += "Line " + to_string(lineCount) + ": unary_expression : factor\n\n" + $1->getName() + "\n\n";

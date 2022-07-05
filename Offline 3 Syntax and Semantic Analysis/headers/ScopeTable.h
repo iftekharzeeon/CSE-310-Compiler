@@ -86,6 +86,38 @@ public:
         }
     }
 
+    bool insert(string name, string type, string datType, int varType) {
+        int hashValueIndex = hashFunction(name.c_str());
+        SymbolInfo *symbolInfo = existCheck(name); //Check for existence
+
+        if (symbolInfo != nullptr) {
+            //Already exists
+            // cout << "<" + symbolInfo->getName() + " : " << symbolInfo->getType() + "> already exists in current ScopeTable" << endl;
+            return false;
+        } else {
+            symbolInfo = scopeTable[hashValueIndex];
+            if (symbolInfo == nullptr) {
+                //Bucket is empty
+                SymbolInfo *newSymbolInfo = new SymbolInfo(name, type, datType, varType);
+                scopeTable[hashValueIndex] = newSymbolInfo;
+                // cout << "Inserted in ScopeTable# " << getId() << " at position " << hashValueIndex << ", 0" << endl;
+            } else {
+                //Bucket is not empty
+                int counter = 1;
+                //Get to the last object of the linked list
+                while (symbolInfo->getNextObj() != nullptr) {
+                    symbolInfo = symbolInfo->getNextObj();
+                    counter++;
+                }
+                SymbolInfo *newSymbolInfo;
+                newSymbolInfo = new SymbolInfo(name, type, datType);
+                symbolInfo->setNextObj(newSymbolInfo);
+                // cout << "Inserted into ScopeTable# " << getId() << " at position " << hashValueIndex << ", " << counter << endl;
+            }
+            return true;
+        }
+    }
+
     SymbolInfo* existCheck(string name) {
         //Get the bucket
         int hashValueIndex = hashFunction(name.c_str());
@@ -112,7 +144,7 @@ public:
         while (symbolInfo != nullptr) {
             //if nullptr, then no object exists
             if (symbolInfo->getName() == name) {
-                cout << "Found in ScopeTable# " << scopeTableId << " at position " << hashValueIndex << ", " << counter << endl;
+                // cout << "Found in ScopeTable# " << scopeTableId << " at position " << hashValueIndex << ", " << counter << endl;
                 return symbolInfo;
             }
             symbolInfo = symbolInfo->getNextObj();

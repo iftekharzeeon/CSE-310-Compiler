@@ -266,7 +266,7 @@ UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 }
 
 "//" {
-	cout << "Comment found" << endl;
+	
 	commentLiteral += yytext;
 	BEGIN SINGLE_COMMENT_STATE;
 }
