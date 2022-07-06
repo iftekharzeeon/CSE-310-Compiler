@@ -111,13 +111,16 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON {
 					if (symbolInfo == nullptr) {
 						symbolTable->insert($2->getName(), $2->getType());
 						symbolInfo = symbolTable->lookUp($2->getName());
-						symbolInfo->setDatType($1->getName());						
+						symbolInfo->setDatType($1->getName());	
+						symbolInfo->setNumberOfParams(parametersList.size());					
 					} else {
 						// Error 
 						errorCount++;
 						errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $2->getName() + "\n\n";
 						logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $2->getName() + "\n\n";
 					}
+
+					parametersList.clear();
 				}
 				| type_specifier ID LPAREN RPAREN SEMICOLON {
 					logFileText += "Line " + to_string(lineCount) + ": func_declaration : type_specifier ID LPAREN RPAREN SEMICOLON\n\n" + $1->getName() + " " + $2->getName() + "();\n\n";
@@ -143,12 +146,26 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 				symbolTable->insert($2->getName(), $2->getType());
 				symbolInfo = symbolTable->lookUp($2->getName());
 				symbolInfo->setDatType($1->getName());
+				symbolInfo->setNumberOfParams(parametersList.size());
 			} else {
 
 				int isDefined = symbolInfo->getIsDefined();
+				int variableType = symbolInfo->getVarType();
 
-				if (isDefined == 0) {
+				if (isDefined == 0 && variableType == 0) {
 					symbolInfo->setIsDefined(1);
+					if ($1->getName() != symbolInfo->getDatType()) {
+						errorCount++;
+						logFileText += "Error at line " + to_string(lineCount) + ": Return type mismatch with function declaration in function " + $2->getName() + "\n\n";
+						errorFileText += "Error at line " + to_string(lineCount) + ": Return type mismatch with function declaration in function " + $2->getName() + "\n\n";
+					}
+
+					if (symbolInfo->getNumberOfParams() != parametersList.size()) {
+						errorCount++;
+						logFileText += "Error at line " + to_string(lineCount) + ": Total number of arguments mismatch with declaration in function " + $2->getName() + "\n\n";
+						errorFileText += "Error at line " + to_string(lineCount) + ": Total number of arguments mismatch with declaration in function " + $2->getName() + "\n\n";
+					}
+					
 				} else {
 					// Error
 					errorCount++;
@@ -230,7 +247,6 @@ parameter_list  : parameter_list COMMA type_specifier ID {
 compound_statement : LCURL {
 						symbolTable->enterNewScope(7);
 
-
 						int paramListSize = parametersList.size();
 						while (paramListSize != 0) {
 							SymbolInfo *s1 = parametersList.at(paramListSize-1);
@@ -267,8 +283,14 @@ compound_statement : LCURL {
 				;
  		    
 var_declaration : type_specifier declaration_list SEMICOLON {
-					logFileText += "Line " + to_string(lineCount) + ": var_declaration : type_specifier declaration_list SEMICOLON\n\n" + $1->getName() + " " + $2->getName() + ";\n\n";
+					logFileText += "Line " + to_string(lineCount) + ": var_declaration : type_specifier declaration_list SEMICOLON\n\n";
 					
+					if ($1->getName() == "void") {
+						errorCount++;
+						logFileText += "Error at line " + to_string(lineCount) + ": Variable type cannot be void\n\n";
+						errorFileText += "Error at line " + to_string(lineCount) + ": Variable type cannot be void\n\n";
+					}
+					logFileText += $1->getName() + " " + $2->getName() + ";\n\n";
 					$$ = new SymbolInfo($1->getName() + " " + $2->getName() + ";", "var_declaration");
 					typeName = "";
 
@@ -365,7 +387,7 @@ statement : var_declaration {
 
 		}
 		| FOR LPAREN expression_statement expression_statement expression RPAREN statement {
-			string output = "for (" + $3->getName() + $4->getName() + $5->getName() + ")" + $7->getName(); 
+			string output = "for(" + $3->getName() + $4->getName() + $5->getName() + ")" + $7->getName(); 
 			logFileText += "Line " + to_string(lineCount) + ": statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement\n\n" + output + "\n\n";
 			$$ = $7;
 
@@ -394,7 +416,14 @@ statement : var_declaration {
 		}
 		| PRINTLN LPAREN ID RPAREN SEMICOLON {
 			string output = "printf(" + $3->getName() + ");"; 
-			logFileText += "Line " + to_string(lineCount) + ": statement : PRINTLN LPAREN ID RPAREN SEMICOLON\n\n" + output + "\n\n";
+			if (symbolTable->lookUp($3->getName()) == nullptr) {
+				errorCount++;
+				logFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $3->getName() + "\n\n";
+				errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $3->getName() + "\n\n";
+			}
+			logFileText += "Line " + to_string(lineCount) + ": statement : PRINTLN LPAREN ID RPAREN SEMICOLON\n\n";
+
+			logFileText += output + "\n\n";
 			$$ = new SymbolInfo(output, "STATEMENT");
 
 		}
@@ -428,7 +457,7 @@ variable : ID {
 
 			} else {
 				int variableType = tempSymbolInfo->getVarType();
-				cout << tempSymbolInfo->getName() << tempSymbolInfo->getVarType() << endl;
+				// cout << tempSymbolInfo->getName() << tempSymbolInfo->getVarType() << endl;
 
 				if (variableType == 2) {
 					errorCount++;
@@ -480,6 +509,7 @@ expression : logic_expression {
  			}
 			| variable ASSIGNOP logic_expression {
 				string variableName;
+				string functionName;
 
 				logFileText += "Line " + to_string(lineCount) + ": expression : variable ASSIGNOP logic_expression\n\n";
 
@@ -499,13 +529,25 @@ expression : logic_expression {
 
 					if ($3->getType() == "CONST_INT" || $3->getType() == "CONST_FLOAT") {
 						if (typeName == "CONST_INT" && typeName != $3->getType()) {
-							cout << $3->getName() << " " << variableName << " " << $3->getType() << endl;
+							// cout << $3->getName() << " " << variableName << " " << $3->getType() << endl;
 							errorCount++;
 							logFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch\n\n";
 							errorFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch\n\n";
 						}
-					} else {
+					} else if ($3->getType() == "FUNCTION") {
+						int position = $3->getName().find('(');
+						functionName = $3->getName().substr(0,position);
+						SymbolInfo *temp = symbolTable->lookUp(functionName);
 
+						if (temp == nullptr) {
+							errorCount++;
+							logFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + functionName + "\n\n";
+							errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + functionName + "\n\n";
+						} else if (temp->getDatType() == "void") {
+							errorCount++;
+							logFileText += "Error at line " + to_string(lineCount) + ": Void function used in expression\n\n";
+							errorFileText += "Error at line " + to_string(lineCount) + ": Void function used in expression\n\n";
+						}
 					}
 				}
 
@@ -552,11 +594,39 @@ term :	unary_expression {
 	}
     |  term MULOP unary_expression {
 		logFileText += "Line " + to_string(lineCount) + ": term : term MULOP unary_expression\n\n";
-
+		cout << $2->getName() << $3->getName() << endl;
 		if ($2->getName() == "%" && $3->getType() == "CONST_FLOAT") {
 			errorCount++;
 			logFileText += "Error at line " + to_string(lineCount) + ": Non-Integer operand on modulus operator\n\n";
 			errorFileText += "Error at line " + to_string(lineCount) + ": Non-Integer operand on modulus operator\n\n";
+		} else if (($2->getName() == "/" || $2->getName() == "%") && ($3->getType() == "CONST_FLOAT" || $3->getType() == "CONST_INT")) {
+			if($3->getName() == "0" || $3->getName() == "0.0") {
+				errorCount++;
+				if ($2->getName() == "/") {
+					logFileText += "Error at line " + to_string(lineCount) + ": Divide by Zero\n\n";
+					errorFileText += "Error at line " + to_string(lineCount) + ": Divide by Zero\n\n";
+				} else {
+					logFileText += "Error at line " + to_string(lineCount) + ": Modulus by Zero\n\n";
+					errorFileText += "Error at line " + to_string(lineCount) + ": Modulus by Zero\n\n";
+				}
+			}
+		}
+
+		if ($3->getType() == "FUNCTION") {
+			int position = $3->getName().find('(');
+			string functionName = $3->getName().substr(0,position);
+
+			SymbolInfo *tempSymbolInfo = symbolTable->lookUp(functionName);
+
+			if (tempSymbolInfo == nullptr) {
+				errorCount++;
+				logFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + functionName + "\n\n";
+				errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + functionName + "\n\n";
+			} else if (tempSymbolInfo->getDatType() == "void") {
+				errorCount++;
+				logFileText += "Error at line " + to_string(lineCount) + ": Void function used in expression\n\n";
+				errorFileText += "Error at line " + to_string(lineCount) + ": Void function used in expression\n\n";
+			}			
 		}
 		
 		logFileText += $1->getName() + $2->getName() + $3->getName() + "\n\n";
@@ -587,7 +657,7 @@ factor	: variable {
 		}
 		| ID LPAREN argument_list RPAREN {
 			logFileText += "Line " + to_string(lineCount) + ": factor : ID LPAREN argument_list RPAREN\n\n" + $1->getName() + "(" + $3->getName() + ")" + "\n\n";
-			$$ = new SymbolInfo($1->getName() + "(" + $3->getName() + ")", "factor");
+			$$ = new SymbolInfo($1->getName() + "(" + $3->getName() + ")", "FUNCTION");
 		}
 		| LPAREN expression RPAREN {
 			logFileText += "Line " + to_string(lineCount) + ": factor : LPAREN expression RPAREN\n\n" + "(" + $2->getName() + ")" + "\n\n";

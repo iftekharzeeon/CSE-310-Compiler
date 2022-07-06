@@ -19,6 +19,7 @@ private:
     string datType;
     int isDefined;
     int varType; //0-> Function 1-> Variable 2->Array
+    int numberOfParams;
 
 
 public:
@@ -30,6 +31,7 @@ public:
         this->isDefined = 0; // The symbol is not defined yet
         this->datType = "";
         this->varType = 0;
+        this->numberOfParams = 0;
 
     }
 
@@ -41,6 +43,7 @@ public:
         this->isDefined = 0;
         this->datType = "";
         this->varType = 0;
+        this->numberOfParams = 0;
     }
 
     SymbolInfo(string name, string type, string datType)
@@ -51,6 +54,7 @@ public:
         this->isDefined = 0;
         this->datType = datType;
         this->varType = 0;
+        this->numberOfParams = 0;
     }
 
     SymbolInfo(string name, string type, string datType, int varType)
@@ -61,6 +65,7 @@ public:
         this->isDefined = 0;
         this->datType = datType;
         this->varType = varType;
+        this->numberOfParams = 0;
     }
 
     string getName()
@@ -115,6 +120,14 @@ public:
 
     void setVarType(int varType) {
         this->varType = varType;
+    }
+
+    int getNumberOfParams() {
+        return this->numberOfParams;
+    }
+
+    void setNumberOfParams(int numberOfParams) {
+        this->numberOfParams = numberOfParams;
     }
 
     ~SymbolInfo()
