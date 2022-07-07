@@ -23,6 +23,8 @@ FILE *logFile;
 FILE *errorFile;
 
 vector<SymbolInfo*> parametersList;
+vector<SymbolInfo*> argumentList;
+
 string typeName = "";
 
 void yyerror(char *s)
@@ -180,6 +182,15 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 			logFileText += "Line " + to_string(lineCount) + ": func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statement\n\n" + output + "\n\n";
 			$$ = new SymbolInfo(output, "func_definition");
 
+			int paramListSize = parametersList.size();
+			int i = 0;
+			while (i != paramListSize) {
+				SymbolInfo *s1 = parametersList.at(i);
+				symbolTable->lookUp($2->getName())->addParameters(s1->getType());
+				i++;
+				
+			}
+
 			parametersList.clear();
 			
 		}
@@ -219,6 +230,7 @@ parameter_list  : parameter_list COMMA type_specifier ID {
 
 					SymbolInfo *s1 = new SymbolInfo($4->getName(), $3->getName());
 					parametersList.push_back(s1);
+
 				}
 				| parameter_list COMMA type_specifier {
 					logFileText += "Line " + to_string(lineCount) + ": parameter_list : parameter_list COMMA type_specifier\n\n" + $1->getName() + "," + $3->getName() + "\n\n";
@@ -248,16 +260,16 @@ compound_statement : LCURL {
 						symbolTable->enterNewScope(7);
 
 						int paramListSize = parametersList.size();
-						while (paramListSize != 0) {
-							SymbolInfo *s1 = parametersList.at(paramListSize-1);
+						int i = 0;
+						while (i != paramListSize) {
+							SymbolInfo *s1 = parametersList.at(i);
 							if (!symbolTable->insert(s1->getName(), "ID")) {
 								// Error 
 								errorCount++;
 								logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
 								errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
 							}
-							parametersList.pop_back();
-							paramListSize--;
+							i++;
 							
 						}
 					}
@@ -499,7 +511,7 @@ variable : ID {
 
 			logFileText += $1->getName() + "[" + $3->getName() + "]" + "\n\n";
 
-			$$ = new SymbolInfo($1->getName() + "[" + $3->getName() + "]", "VARIABLE");
+			$$ = new SymbolInfo($1->getName() + "[" + $3->getName() + "]", "ARRAY_VAR");
 		}
 		;
 	 
@@ -513,7 +525,7 @@ expression : logic_expression {
 
 				logFileText += "Line " + to_string(lineCount) + ": expression : variable ASSIGNOP logic_expression\n\n";
 
-				if ($1->getType() == "VARIABLE") {
+				if ($1->getType() == "ARRAY_VAR") {
 					int position = $1->getName().find('[');
 					variableName = $1->getName().substr(0,position);
 				} else if($1->getType() == "ID") {
@@ -539,11 +551,7 @@ expression : logic_expression {
 						functionName = $3->getName().substr(0,position);
 						SymbolInfo *temp = symbolTable->lookUp(functionName);
 
-						if (temp == nullptr) {
-							errorCount++;
-							logFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + functionName + "\n\n";
-							errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + functionName + "\n\n";
-						} else if (temp->getDatType() == "void") {
+						if (temp != nullptr && temp->getDatType() == "void") {
 							errorCount++;
 							logFileText += "Error at line " + to_string(lineCount) + ": Void function used in expression\n\n";
 							errorFileText += "Error at line " + to_string(lineCount) + ": Void function used in expression\n\n";
@@ -594,7 +602,7 @@ term :	unary_expression {
 	}
     |  term MULOP unary_expression {
 		logFileText += "Line " + to_string(lineCount) + ": term : term MULOP unary_expression\n\n";
-		cout << $2->getName() << $3->getName() << endl;
+		// cout << $2->getName() << $3->getName() << endl;
 		if ($2->getName() == "%" && $3->getType() == "CONST_FLOAT") {
 			errorCount++;
 			logFileText += "Error at line " + to_string(lineCount) + ": Non-Integer operand on modulus operator\n\n";
@@ -618,11 +626,7 @@ term :	unary_expression {
 
 			SymbolInfo *tempSymbolInfo = symbolTable->lookUp(functionName);
 
-			if (tempSymbolInfo == nullptr) {
-				errorCount++;
-				logFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + functionName + "\n\n";
-				errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + functionName + "\n\n";
-			} else if (tempSymbolInfo->getDatType() == "void") {
+			if (tempSymbolInfo != nullptr && tempSymbolInfo->getDatType() == "void") {
 				errorCount++;
 				logFileText += "Error at line " + to_string(lineCount) + ": Void function used in expression\n\n";
 				errorFileText += "Error at line " + to_string(lineCount) + ": Void function used in expression\n\n";
@@ -656,7 +660,31 @@ factor	: variable {
 			$$ = $1;
 		}
 		| ID LPAREN argument_list RPAREN {
-			logFileText += "Line " + to_string(lineCount) + ": factor : ID LPAREN argument_list RPAREN\n\n" + $1->getName() + "(" + $3->getName() + ")" + "\n\n";
+			logFileText += "Line " + to_string(lineCount) + ": factor : ID LPAREN argument_list RPAREN\n\n";
+
+			SymbolInfo *s1 = symbolTable->lookUp($1->getName());
+			if (s1 == nullptr) {
+				errorCount++;
+				logFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + $1->getName() + "\n\n";
+				errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + $1->getName() + "\n\n";
+			} else { 
+				cout << argumentList.size() << endl;
+				vector<string> pList = s1->getParamList();
+				int pListSize = pList.size();
+				int i = 0;
+				if (pListSize != argumentList.size()) {
+					errorCount++;
+				} else {
+					while(i != pListSize) {
+					cout << argumentList.at(i)->getName() + " " << argumentList.at(i)->getType() + " " << pList.at(i) << endl;
+					i++;
+					}
+				}
+			}
+
+			argumentList.clear();
+
+			logFileText += $1->getName() + "(" + $3->getName() + ")" + "\n\n";
 			$$ = new SymbolInfo($1->getName() + "(" + $3->getName() + ")", "FUNCTION");
 		}
 		| LPAREN expression RPAREN {
@@ -692,10 +720,15 @@ arguments : arguments COMMA logic_expression {
 			logFileText += "Line " + to_string(lineCount) + ": arguments : arguments COMMA logic_expression\n\n" + $1->getName() + "," + $3->getName() + "\n\n";
 			$$ = $1;
 			$$->setName($1->getName() + "," + $3->getName());
+			SymbolInfo *tempSymbolInfo = new SymbolInfo($3->getName(), $3->getType());
+			argumentList.push_back(tempSymbolInfo);
 		}
 	    | logic_expression {
 			logFileText += "Line " + to_string(lineCount) + ": arguments : logic_expression\n\n" + $1->getName() + "\n\n";
 			$$ = $1;
+			
+			SymbolInfo *tempSymbolInfo = new SymbolInfo($1->getName(), $1->getType());
+			argumentList.push_back(tempSymbolInfo);
 		}
 	    ;
  

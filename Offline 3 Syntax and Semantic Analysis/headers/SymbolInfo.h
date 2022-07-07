@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -20,6 +21,8 @@ private:
     int isDefined;
     int varType; //0-> Function 1-> Variable 2->Array
     int numberOfParams;
+
+    vector<string> parametersList;
 
 
 public:
@@ -128,6 +131,14 @@ public:
 
     void setNumberOfParams(int numberOfParams) {
         this->numberOfParams = numberOfParams;
+    }
+
+    void addParameters(string type) {
+        this->parametersList.push_back(type);
+    }
+
+    vector<string> getParamList() {
+        return this->parametersList;
     }
 
     ~SymbolInfo()

@@ -2516,6 +2516,8 @@ a
 
 Line 62: factor : ID LPAREN argument_list RPAREN
 
+Error at line 62: Undeclared function foo5
+
 foo5(a)
 
 Line 62: unary_expression : factor
@@ -2539,8 +2541,6 @@ Line 62: logic_expression : rel_expression
 foo5(a)
 
 Line 62: expression : variable ASSIGNOP logic_expression
-
-Error at line 62: Undeclared function foo5
 
 dd=foo5(a)
 
@@ -2820,4 +2820,4 @@ ScopeTable# 1
 6 --> <a : ID> <foo4 : ID> <main : ID> 
 
 Total lines: 71
-Total errors: 18
+Total errors: 19
