@@ -4,68 +4,121 @@ int
 
 Line 1: declaration_list : ID
 
-x
+a
 
 Line 1: declaration_list : declaration_list COMMA ID
 
-x,y
+a,b
 
 Line 1: declaration_list : declaration_list COMMA ID
 
-x,y,z
+a,b,c
 
 Line 1: var_declaration : type_specifier declaration_list SEMICOLON
 
-int x,y,z;
+int a,b,c;
 
 Line 1: unit : var_declaration
 
-int x,y,z;
+int a,b,c;
 
 
 Line 1: program : unit
 
-int x,y,z;
-
-
-Line 1: type_specifier : FLOAT
-
-float
-
-Line 1: declaration_list : ID
-
-a
-
-Line 1: var_declaration : type_specifier declaration_list SEMICOLON
-
-float a;
-
-Line 1: unit : var_declaration
-
-float a;
-
-
-Line 1: program : program unit
-
-int x,y,z;
-float a;
+int a,b,c;
 
 
 Line 3: type_specifier : INT
 
 int
 
-Line 3: type_specifier : INT
+Line 4: factor : ID LPAREN argument_list RPAREN
 
-int
+Error at line 4: b is not a function 
 
-Error at line 3: syntax error 
+b()
+
+Line 4: unary_expression : factor
+
+b()
+
+Line 4: term : unary_expression
+
+b()
+
+Line 4: simple_expression : term
+
+b()
+
+Line 4: rel_expression : simple_expression
+
+b()
+
+Line 4: logic_expression : rel_expression
+
+b()
+
+Line 4: expression : logic_expression
+
+b()
+
+Line 4: expression_statement : expression SEMICOLON
+
+b();
+
+Line 4: statement : expression_statement
+
+b();
+
+Line 4: statements : statement
+
+b();
+
+Line 5: compound_statement : LCURL statements RCURL
+
+{
+b();
+}
+
+
+ScopeTable# 1.1
 
 ScopeTable# 1
-1 --> <x : ID> 
-2 --> <y : ID> 
-3 --> <z : ID> 
-6 --> <a : ID> 
+0 --> <b : ID> 
+1 --> <c : ID> 
+6 --> <a : ID> <main : ID> 
 
-Total lines: 3
+Line 5: func_definition : type_specifier ID LPAREN RPAREN compound_statement
+
+int main(){
+b();
+}
+
+
+Line 5: unit : func_definition
+
+int main(){
+b();
+}
+
+
+
+Line 5: program : program unit
+
+int a,b,c;
+int main(){
+b();
+}
+
+
+
+Line 5: start : program
+
+
+ScopeTable# 1
+0 --> <b : ID> 
+1 --> <c : ID> 
+6 --> <a : ID> <main : ID> 
+
+Total lines: 5
 Total errors: 1

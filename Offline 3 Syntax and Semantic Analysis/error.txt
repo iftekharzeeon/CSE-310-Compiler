@@ -1,2 +1,2 @@
-Error at line 3: syntax error 
+Error at line 4: b is not a function 
 

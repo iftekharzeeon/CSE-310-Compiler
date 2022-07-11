@@ -336,6 +336,7 @@ compound_statement : LCURL {
 				}
 				RCURL {
 					logFileText += "Line " + to_string(lineCount) + ": compound_statement : LCURL RCURL\n\n{}\n\n";
+					$$ = new SymbolInfo("{}", "COMP_STATEMENT");
 					logFileText += symbolTable->printAllScopeTable();
 					symbolTable->exitCurrentScope();
 				}
@@ -604,6 +605,16 @@ expression : logic_expression {
 							errorCount++;
 							logFileText += "Error at line " + to_string(lineCount) + ": Void function used in expression\n\n";
 							errorFileText += "Error at line " + to_string(lineCount) + ": Void function used in expression\n\n";
+						} else if (temp != nullptr && (temp->getDatType() != tempSymbolInfo->getDatType())) {
+							errorCount++;
+							logFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch\n\n";
+							errorFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch\n\n";
+						}
+					} else if ($3->getType() == "LOGIC_EXPRESSION" || $3->getType() == "RELOP_EXPRESSION") {
+						if (tempSymbolInfo->getDatType() != "int") {
+							errorCount++;
+							logFileText += "Error at line " + to_string(lineCount) + ": Result of LOGICOP and RELOP must be an int\n\n";
+							errorFileText += "Error at line " + to_string(lineCount) + ": Result of LOGICOP and RELOP must be an int\n\n";
 						}
 					}
 				}
@@ -630,7 +641,7 @@ rel_expression	: simple_expression {
 				}
 				| simple_expression RELOP simple_expression	{
 					logFileText += "Line " + to_string(lineCount) + ": rel_expression : simple_expression RELOP simple_expression\n\n" + $1->getName() + $2->getName() + $3->getName() + "\n\n";
-					$$ = new SymbolInfo($1->getName() + $2->getName() + $3->getName(),"rel_expression");
+					$$ = new SymbolInfo($1->getName() + $2->getName() + $3->getName(),"RELOP_EXPRESSION");
 				}
 				;
 				
@@ -652,7 +663,7 @@ term :	unary_expression {
     |  term MULOP unary_expression {
 		logFileText += "Line " + to_string(lineCount) + ": term : term MULOP unary_expression\n\n";
 		// cout << $2->getName() << $3->getName() << endl;
-		if ($2->getName() == "%" && $3->getType() == "CONST_FLOAT") {
+		if ($2->getName() == "%" && ($3->getType() == "CONST_FLOAT" || $1->getType() == "CONST_FLOAT")) {
 			errorCount++;
 			logFileText += "Error at line " + to_string(lineCount) + ": Non-Integer operand on modulus operator\n\n";
 			errorFileText += "Error at line " + to_string(lineCount) + ": Non-Integer operand on modulus operator\n\n";
@@ -717,54 +728,58 @@ factor	: variable {
 				logFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + $1->getName() + "\n\n";
 				errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + $1->getName() + "\n\n";
 			} else { 
-				cout << "-----"<< endl;
-				vector<string> pList = s1->getParamList();
-				int pListSize = pList.size();
-				int i = 0;
-				if (pListSize != argumentList.size()) {
+				if (s1->getVarType() != 0) {
 					errorCount++;
-					logFileText += "Error at line " + to_string(lineCount) + ": Total number of arguments mismatch in function " + $1->getName() + "\n\n";
-					errorFileText += "Error at line " + to_string(lineCount) + ": Total number of arguments mismatch in function " + $1->getName() + "\n\n";
+					logFileText += "Error at line " + to_string(lineCount) + ": " +  $1->getName() + " is not a function " + "\n\n";
+					errorFileText += "Error at line " + to_string(lineCount) + ": " +  $1->getName() + " is not a function " + "\n\n";
 				} else {
-					while(i != pListSize) {
-						
-						string variableName = argumentList.at(i)->getName();
-						string variableType = argumentList.at(i)->getType();
-						string argumentType = pList.at(i);
+					vector<string> pList = s1->getParamList();
+					int pListSize = pList.size();
+					int i = 0;
+					if (pListSize != argumentList.size()) {
+						errorCount++;
+						logFileText += "Error at line " + to_string(lineCount) + ": Total number of arguments mismatch in function " + $1->getName() + "\n\n";
+						errorFileText += "Error at line " + to_string(lineCount) + ": Total number of arguments mismatch in function " + $1->getName() + "\n\n";
+					} else {
+						while(i != pListSize) {
+							
+							string variableName = argumentList.at(i)->getName();
+							string variableType = argumentList.at(i)->getType();
+							string argumentType = pList.at(i);
 
-						if (variableType == "CONST_INT" || "CONST_FLOAT") {
-							if (variableType == "CONST_INT" && argumentType != "int") {
-								errorCount++;
-								logFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
-								errorFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
-								break;
-							}
-							if (variableType == "CONST_FLOAT" && argumentType != "float") {
-								errorCount++;
-								logFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
-								errorFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
-								break;
-							}
-						} else if (variableType == "ID") {
-							SymbolInfo *tempSymbolInfo = symbolTable->lookUp(variableName);
-							if (tempSymbolInfo != nullptr) {
-								if (tempSymbolInfo->getVarType() == 1) {
-									if (tempSymbolInfo->getDatType() != argumentType) {
-										errorCount++;
-										logFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
-										errorFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
-										break;
+							if (variableType == "CONST_INT" || "CONST_FLOAT") {
+								if (variableType == "CONST_INT" && argumentType != "int") {
+									errorCount++;
+									logFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
+									errorFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
+									break;
+								}
+								if (variableType == "CONST_FLOAT" && argumentType != "float") {
+									errorCount++;
+									logFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
+									errorFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
+									break;
+								}
+							} else if (variableType == "ID") {
+								SymbolInfo *tempSymbolInfo = symbolTable->lookUp(variableName);
+								if (tempSymbolInfo != nullptr) {
+									if (tempSymbolInfo->getVarType() == 1) {
+										if (tempSymbolInfo->getDatType() != argumentType) {
+											errorCount++;
+											logFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
+											errorFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
+											break;
+										}
 									}
 								}
 							}
+
+							// cout << argumentList.at(i)->getName() + " " << argumentList.at(i)->getType() + " " << pList.at(i) << endl;
+							i++;
 						}
-
-						cout << argumentList.at(i)->getName() + " " << argumentList.at(i)->getType() + " " << pList.at(i) << endl;
-						i++;
 					}
-				}
+				}	
 			}
-
 			argumentList.clear();
 
 			logFileText += $1->getName() + "(" + $3->getName() + ")" + "\n\n";
@@ -796,7 +811,9 @@ argument_list : arguments {
 				logFileText += "Line " + to_string(lineCount) + ": argument_list : arguments\n\n" + $1->getName() + "\n\n";
 				$$ = $1;
 			}
-			| {}
+			| {
+				$$ = new SymbolInfo("", "BLANK_ARGUMENT_LIST");
+			}
 			;
 	
 arguments : arguments COMMA logic_expression {
