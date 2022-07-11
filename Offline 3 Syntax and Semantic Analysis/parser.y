@@ -29,7 +29,12 @@ string typeName = "";
 
 void yyerror(char *s)
 {
-	//write your code
+	errorCount++;
+	errorFileText += "Error at line " + to_string(lineCount) + ": syntax error " + "\n\n";
+	logFileText += "Error at line " + to_string(lineCount) + ": syntax error " + "\n\n";
+	cout << s << endl;
+
+	return;
 }
 
 
@@ -61,7 +66,8 @@ void yyerror(char *s)
 %left 
 %right
 
-%nonassoc 
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 
 
 %%
@@ -446,7 +452,7 @@ statement : var_declaration {
 
 			$$->setName(output);
 		}
-		| IF LPAREN expression RPAREN statement {
+		| IF LPAREN expression RPAREN statement %prec LOWER_THAN_ELSE {
 			string output = "if (" + $3->getName() + ")" + $5->getName(); 
 			logFileText += "Line " + to_string(lineCount) + ": statement : IF LPAREN expression RPAREN statement\n\n" + output + "\n\n";
 			$$ = $5;
