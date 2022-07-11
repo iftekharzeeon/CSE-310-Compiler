@@ -480,6 +480,8 @@ int
 
 Line 20: parameter_list : parameter_list COMMA type_specifier ID
 
+Error at line 20: Multiple declaration of a in parameter
+
 int a,int a
 
 Line 20: type_specifier : FLOAT
@@ -489,8 +491,6 @@ float
 Line 20: parameter_list : parameter_list COMMA type_specifier ID
 
 int a,int a,float b
-
-Error at line 21: Multiple declaration of a in parameter
 
 Line 21: variable : ID
 
@@ -1277,6 +1277,8 @@ Line 45: argument_list : arguments
 
 Line 45: factor : ID LPAREN argument_list RPAREN
 
+Error at line 45: 1th argument mismatch in function func
+
 func(2.5,3.5)
 
 Line 45: unary_expression : factor
@@ -1478,6 +1480,8 @@ a
 
 Line 49: factor : ID LPAREN argument_list RPAREN
 
+Error at line 49: Total number of arguments mismatch in function correct_foo
+
 correct_foo(a)
 
 Line 49: unary_expression : factor
@@ -1619,7 +1623,7 @@ Line 52: expression : logic_expression
 
 Line 52: variable : ID LTHIRD expression RTHIRD
 
-Error at line 52: Type Mismatch, b is an array
+Error at line 52: Type Mismatch, b is not an array
 
 b[5]
 
@@ -2572,9 +2576,9 @@ b=5%0;
 b=2%3.5;
 dd=foo5(a);
 
-Error at line 67: Undeclared variable h
-
 Line 67: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+Error at line 67: Undeclared variable h
 
 printf(h);
 
@@ -2820,4 +2824,4 @@ ScopeTable# 1
 6 --> <a : ID> <foo4 : ID> <main : ID> 
 
 Total lines: 71
-Total errors: 19
+Total errors: 20

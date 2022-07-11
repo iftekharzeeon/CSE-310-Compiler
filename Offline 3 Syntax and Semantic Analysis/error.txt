@@ -1,4 +1,4 @@
-Error at line 21: Multiple declaration of a in parameter
+Error at line 20: Multiple declaration of a in parameter
 
 Error at line 24: Return type mismatch with function declaration in function foo3
 
@@ -12,11 +12,15 @@ Error at line 43: Multiple declaration of a
 
 Error at line 43: Multiple declaration of c
 
+Error at line 45: 1th argument mismatch in function func
+
 Error at line 48: Type Mismatch, c is an array
+
+Error at line 49: Total number of arguments mismatch in function correct_foo
 
 Error at line 51: Undeclared variable k
 
-Error at line 52: Type Mismatch, b is an array
+Error at line 52: Type Mismatch, b is not an array
 
 Error at line 53: Expression inside third brackets not an integer
 

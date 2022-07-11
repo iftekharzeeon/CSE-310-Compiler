@@ -224,33 +224,79 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 
 
 parameter_list  : parameter_list COMMA type_specifier ID {
-					logFileText += "Line " + to_string(lineCount) + ": parameter_list : parameter_list COMMA type_specifier ID\n\n" + $1->getName() + "," + $3->getName() + " " + $4->getName() + "\n\n";
+					logFileText += "Line " + to_string(lineCount) + ": parameter_list : parameter_list COMMA type_specifier ID\n\n";
+					
+
+					SymbolInfo *s1 = new SymbolInfo($4->getName(), $3->getName());
+
+					for (vector<SymbolInfo*>::iterator it = parametersList.begin(); it != parametersList.end(); ++it) {
+						if ((*it)->getName() == s1->getName()) {
+							errorCount++;
+							logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
+							errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
+						}
+					}	
+
+					logFileText += $1->getName() + "," + $3->getName() + " " + $4->getName() + "\n\n";
 					$$ = $1;
 					$$->setName($1->getName() + "," + $3->getName() + " " + $4->getName());
 
-					SymbolInfo *s1 = new SymbolInfo($4->getName(), $3->getName());
 					parametersList.push_back(s1);
 
 				}
 				| parameter_list COMMA type_specifier {
-					logFileText += "Line " + to_string(lineCount) + ": parameter_list : parameter_list COMMA type_specifier\n\n" + $1->getName() + "," + $3->getName() + "\n\n";
-					$$ = new SymbolInfo($1->getName() + "," + $3->getName(), "PARAM_LIST");
+					logFileText += "Line " + to_string(lineCount) + ": parameter_list : parameter_list COMMA type_specifier\n\n";
 
 					SymbolInfo *s1 = new SymbolInfo("", $3->getName());
+
+					for (vector<SymbolInfo*>::iterator it = parametersList.begin(); it != parametersList.end(); ++it) {
+						if ((*it)->getName() == s1->getName()) {
+							errorCount++;
+							logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
+							errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
+						}
+					}
+
+					logFileText += $1->getName() + "," + $3->getName() + "\n\n";
+					$$ = new SymbolInfo($1->getName() + "," + $3->getName(), "PARAM_LIST");
+
 					parametersList.push_back(s1);
 				}
 				| type_specifier ID {
-					logFileText += "Line " + to_string(lineCount) + ": parameter_list : type_specifier ID\n\n" + $1->getName() + " " + $2->getName() + "\n\n";
-					$$ = new SymbolInfo($1->getName() + " " + $2->getName(), "PARAM_LIST");
+					logFileText += "Line " + to_string(lineCount) + ": parameter_list : type_specifier ID\n\n";
 
 					SymbolInfo *s1 = new SymbolInfo($2->getName(), $1->getName());
+
+					for (vector<SymbolInfo*>::iterator it = parametersList.begin(); it != parametersList.end(); ++it) {
+						if ((*it)->getName() == s1->getName()) {
+							errorCount++;
+							logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
+							errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
+						}
+					}
+
+					logFileText += $1->getName() + " " + $2->getName() + "\n\n";
+					$$ = new SymbolInfo($1->getName() + " " + $2->getName(), "PARAM_LIST");
+
 					parametersList.push_back(s1);
 				}
 				| type_specifier {
-					logFileText += "Line " + to_string(lineCount) + ": parameter_list : type_specifier\n\n" + $1->getName() + "\n\n";
+					logFileText += "Line " + to_string(lineCount) + ": parameter_list : type_specifier\n\n";
 					$$ = new SymbolInfo($1->getName(), "PARAM_LIST");
 
 					SymbolInfo *s1 = new SymbolInfo("", $1->getName());
+
+					for (vector<SymbolInfo*>::iterator it = parametersList.begin(); it != parametersList.end(); ++it) {
+						if ((*it)->getName() == s1->getName()) {
+							errorCount++;
+							logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
+							errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
+						}
+					}
+
+					logFileText += $1->getName() + "\n\n";
+					$$ = new SymbolInfo($1->getName(), "PARAM_LIST");
+
 					parametersList.push_back(s1);
 				}
 				;
@@ -263,12 +309,7 @@ compound_statement : LCURL {
 						int i = 0;
 						while (i != paramListSize) {
 							SymbolInfo *s1 = parametersList.at(i);
-							if (!symbolTable->insert(s1->getName(), "ID")) {
-								// Error 
-								errorCount++;
-								logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
-								errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
-							}
+							symbolTable->insert(s1->getName(), "ID");
 							i++;
 							
 						}
@@ -427,13 +468,15 @@ statement : var_declaration {
 			$$->setName(output);
 		}
 		| PRINTLN LPAREN ID RPAREN SEMICOLON {
+
+			logFileText += "Line " + to_string(lineCount) + ": statement : PRINTLN LPAREN ID RPAREN SEMICOLON\n\n";
+
 			string output = "printf(" + $3->getName() + ");"; 
 			if (symbolTable->lookUp($3->getName()) == nullptr) {
 				errorCount++;
 				logFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $3->getName() + "\n\n";
 				errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $3->getName() + "\n\n";
 			}
-			logFileText += "Line " + to_string(lineCount) + ": statement : PRINTLN LPAREN ID RPAREN SEMICOLON\n\n";
 
 			logFileText += output + "\n\n";
 			$$ = new SymbolInfo(output, "STATEMENT");
@@ -502,8 +545,8 @@ variable : ID {
 
 					if (variableType != 2) {
 						errorCount++;
-						logFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch, " + $1->getName() + " is an array\n\n";
-						errorFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch, " + $1->getName() + " is an array\n\n";
+						logFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch, " + $1->getName() + " is not an array\n\n";
+						errorFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch, " + $1->getName() + " is not an array\n\n";
 						}
 				}
 
@@ -668,16 +711,50 @@ factor	: variable {
 				logFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + $1->getName() + "\n\n";
 				errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared function " + $1->getName() + "\n\n";
 			} else { 
-				cout << argumentList.size() << endl;
+				cout << "-----"<< endl;
 				vector<string> pList = s1->getParamList();
 				int pListSize = pList.size();
 				int i = 0;
 				if (pListSize != argumentList.size()) {
 					errorCount++;
+					logFileText += "Error at line " + to_string(lineCount) + ": Total number of arguments mismatch in function " + $1->getName() + "\n\n";
+					errorFileText += "Error at line " + to_string(lineCount) + ": Total number of arguments mismatch in function " + $1->getName() + "\n\n";
 				} else {
 					while(i != pListSize) {
-					cout << argumentList.at(i)->getName() + " " << argumentList.at(i)->getType() + " " << pList.at(i) << endl;
-					i++;
+						
+						string variableName = argumentList.at(i)->getName();
+						string variableType = argumentList.at(i)->getType();
+						string argumentType = pList.at(i);
+
+						if (variableType == "CONST_INT" || "CONST_FLOAT") {
+							if (variableType == "CONST_INT" && argumentType != "int") {
+								errorCount++;
+								logFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
+								errorFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
+								break;
+							}
+							if (variableType == "CONST_FLOAT" && argumentType != "float") {
+								errorCount++;
+								logFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
+								errorFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
+								break;
+							}
+						} else if (variableType == "ID") {
+							SymbolInfo *tempSymbolInfo = symbolTable->lookUp(variableName);
+							if (tempSymbolInfo != nullptr) {
+								if (tempSymbolInfo->getVarType() == 1) {
+									if (tempSymbolInfo->getDatType() != argumentType) {
+										errorCount++;
+										logFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
+										errorFileText += "Error at line " + to_string(lineCount) + ": " + to_string(i+1) + "th argument mismatch in function " + $1->getName() + "\n\n";
+										break;
+									}
+								}
+							}
+						}
+
+						cout << argumentList.at(i)->getName() + " " << argumentList.at(i)->getType() + " " << pList.at(i) << endl;
+						i++;
 					}
 				}
 			}
