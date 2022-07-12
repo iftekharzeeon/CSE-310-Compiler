@@ -360,17 +360,17 @@ var_declaration : type_specifier declaration_list SEMICOLON {
 type_specifier	: INT {
 					logFileText += "Line " + to_string(lineCount) + ": type_specifier : INT\n\nint\n\n"; 
 					$$ = new SymbolInfo("int", "type_specifier");
-					typeName = "INT";
+					typeName = "int";
 				}
  				| FLOAT {
 					logFileText += "Line " + to_string(lineCount) + ": type_specifier : FLOAT\n\nfloat\n\n";
 					$$ = new SymbolInfo("float", "type_specifier");
-					typeName = "FLOAT";
+					typeName = "float";
 				}
  				| VOID {
 					logFileText += "Line " + to_string(lineCount) + ": type_specifier : VOID\n\nvoid\n\n";
 					$$ = new SymbolInfo("void", "type_specifier");
-					typeName = "VOID";
+					typeName = "void";
 				}
  				;
  		
@@ -587,16 +587,16 @@ expression : logic_expression {
 				if (tempSymbolInfo != nullptr) {
 
 					typeName = tempSymbolInfo->getDatType();
-					typeName = "CONST_" + typeName;
 
 					if ($3->getType() == "CONST_INT" || $3->getType() == "CONST_FLOAT") {
-						if (typeName == "CONST_INT" && typeName != $3->getType()) {
+						if (typeName == "int" && $3->getType() != "CONST_INT") {
 							// cout << $3->getName() << " " << variableName << " " << $3->getType() << endl;
 							errorCount++;
 							logFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch\n\n";
 							errorFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch\n\n";
 						}
 					} else if ($3->getType() == "FUNCTION") {
+						// cout << $3->getName() << endl;
 						int position = $3->getName().find('(');
 						functionName = $3->getName().substr(0,position);
 						SymbolInfo *temp = symbolTable->lookUp(functionName);
@@ -612,6 +612,7 @@ expression : logic_expression {
 						}
 					} else if ($3->getType() == "LOGIC_EXPRESSION" || $3->getType() == "RELOP_EXPRESSION") {
 						if (tempSymbolInfo->getDatType() != "int") {
+							cout << tempSymbolInfo->getDatType() << endl;
 							errorCount++;
 							logFileText += "Error at line " + to_string(lineCount) + ": Result of LOGICOP and RELOP must be an int\n\n";
 							errorFileText += "Error at line " + to_string(lineCount) + ": Result of LOGICOP and RELOP must be an int\n\n";
@@ -653,6 +654,7 @@ simple_expression : term {
 					logFileText += "Line " + to_string(lineCount) + ": simple_expression : simple_expression ADDOP term\n\n" + $1->getName() + $2->getName() + $3->getName() + "\n\n";
 					$$ = $1;
 					$$->setName($1->getName() + $2->getName() + $3->getName());
+					$$->setType("SIMPLE_EXPRESSION");
 				} 
 				;
 					
