@@ -452,6 +452,7 @@ UNFINISHEDCHARACTER '([ -~]{-}[\'])*|'\\'
 	string foundToken = yytext;
 
 	logFileText += "Error at line no " + to_string(lineCount) + ": Unrecognized character " + foundToken + "\n\n";
+	errorFileText += "Error at line no " + to_string(lineCount) + ": Unrecognized character " + foundToken + "\n\n";
 
 	errorCount++;
 }

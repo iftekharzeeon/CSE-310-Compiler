@@ -58,7 +58,7 @@ void yyerror(char *s)
 %type <symbolInfo> LOGICOP
 
 %type <symbolInfo> start program unit var_declaration type_specifier declaration_list func_declaration
-%type <symbolInfo> func_definition variable parameter_list
+%type <symbolInfo> func_definition variable parameter_list error
 
 %type <symbolInfo> expression_statement compound_statement statements unary_expression factor statement
 %type <symbolInfo> expression logic_expression simple_expression rel_expression term arguments argument_list
@@ -304,6 +304,26 @@ parameter_list  : parameter_list COMMA type_specifier ID {
 					$$ = new SymbolInfo($1->getName(), "PARAM_LIST");
 
 					parametersList.push_back(s1);
+				} 
+				| type_specifier error {
+					cout << $2->getName() << endl;
+					logFileText += "Line " + to_string(lineCount) + ": parameter_list : type_specifier\n\n";
+					$$ = new SymbolInfo($1->getName(), "PARAM_LIST");
+
+					SymbolInfo *s1 = new SymbolInfo("", $1->getName());
+
+					for (vector<SymbolInfo*>::iterator it = parametersList.begin(); it != parametersList.end(); ++it) {
+						if ((*it)->getName() == s1->getName()) {
+							errorCount++;
+							logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
+							errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + s1->getName() + " in parameter\n\n";
+						}
+					}
+
+					logFileText += $1->getName() + "\n\n";
+					$$ = new SymbolInfo($1->getName(), "PARAM_LIST");
+
+					parametersList.push_back(s1);
 				}
 				;
 
@@ -408,6 +428,16 @@ declaration_list : declaration_list COMMA ID {
 					$$ = $1;
 					logFileText += "Line " + to_string(lineCount) + ": declaration_list : ID\n\n" + $1->getName() + "\n\n";
 
+				} 
+				| ID error {
+					if (!symbolTable->insert($1->getName(), $1->getType(), typeName, 1)) {
+						errorCount++;
+						errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $1->getName() + "\n\n";
+						logFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $1->getName() + "\n\n";
+					}
+
+					$$ = $1;
+					logFileText += "Line " + to_string(lineCount) + ": declaration_list : ID\n\n" + $1->getName() + "\n\n";
 				}
  		  		| ID LTHIRD CONST_INT RTHIRD {
 
@@ -656,6 +686,12 @@ simple_expression : term {
 					$$->setName($1->getName() + $2->getName() + $3->getName());
 					$$->setType("SIMPLE_EXPRESSION");
 				} 
+				| simple_expression ADDOP error term {
+					logFileText += "Line " + to_string(lineCount) + ": simple_expression : simple_expression ADDOP term\n\n" + $1->getName() + $2->getName() + $4->getName() + "\n\n";
+					$$ = $1;
+					$$->setName($1->getName() + $2->getName() + $4->getName());
+					$$->setType("SIMPLE_EXPRESSION");
+				} 
 				;
 					
 term :	unary_expression {
@@ -847,11 +883,7 @@ int main(int argc,char *argv[])
 	
 
 	logFile= fopen("log.txt","w");
-	errorFile= fopen("error.txt","w");
-	
-	// fp2= fopen(argv[2],"a");
-	// fp3= fopen(argv[3],"a");
-	
+	errorFile= fopen("error.txt","w");	
 
 	yyin=fp;
 	yyparse();
