@@ -9,7 +9,5 @@ int main(){
 	a = 2 + = 6
 	#
 	x = 2;
-	
-	
 	return 0;	
 }

@@ -205,45 +205,45 @@ Line 11: statements : statements statement
 int x,z;
 a=2+2;
 
-Line 14: factor : CONST_INT
+Line 12: factor : CONST_INT
 
 0
 
-Line 14: unary_expression : factor
+Line 12: unary_expression : factor
 
 0
 
-Line 14: term : unary_expression
+Line 12: term : unary_expression
 
 0
 
-Line 14: simple_expression : term
+Line 12: simple_expression : term
 
 0
 
-Line 14: rel_expression : simple_expression
+Line 12: rel_expression : simple_expression
 
 0
 
-Line 14: logic_expression : rel_expression
+Line 12: logic_expression : rel_expression
 
 0
 
-Line 14: expression : logic_expression
+Line 12: expression : logic_expression
 
 0
 
-Line 14: statement : RETURN expression SEMICOLON
+Line 12: statement : RETURN expression SEMICOLON
 
 return 0;
 
-Line 14: statements : statements statement
+Line 12: statements : statements statement
 
 int x,z;
 a=2+2;
 return 0;
 
-Line 15: compound_statement : LCURL statements RCURL
+Line 13: compound_statement : LCURL statements RCURL
 
 {
 int x,z;
@@ -263,7 +263,7 @@ ScopeTable# 1
 3 --> <z : ID> 
 6 --> <a : ID> <main : ID> 
 
-Line 15: func_definition : type_specifier ID LPAREN RPAREN compound_statement
+Line 13: func_definition : type_specifier ID LPAREN RPAREN compound_statement
 
 int main(){
 int x,z;
@@ -272,7 +272,7 @@ return 0;
 }
 
 
-Line 15: unit : func_definition
+Line 13: unit : func_definition
 
 int main(){
 int x,z;
@@ -282,7 +282,7 @@ return 0;
 
 
 
-Line 15: program : program unit
+Line 13: program : program unit
 
 int x,y,z;
 float a;
@@ -295,7 +295,7 @@ return 0;
 
 
 
-Line 16: start : program
+Line 14: start : program
 
 
 ScopeTable# 1
@@ -305,5 +305,5 @@ ScopeTable# 1
 3 --> <z : ID> 
 6 --> <a : ID> <main : ID> 
 
-Total lines: 16
+Total lines: 14
 Total errors: 4

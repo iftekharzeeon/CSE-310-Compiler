@@ -1,0 +1,378 @@
+Line 1: type_specifier : INT
+
+int
+
+Line 4: type_specifier : INT
+
+int
+
+Line 4: declaration_list : ID
+
+i
+
+Line 4: declaration_list : declaration_list COMMA ID
+
+i,j
+
+Line 4: declaration_list : declaration_list COMMA ID
+
+i,j,k
+
+Line 4: var_declaration : type_specifier declaration_list SEMICOLON
+
+int i,j,k;
+
+Line 4: statement : var_declaration
+
+int i,j,k;
+
+Line 4: statements : statement
+
+int i,j,k;
+
+Line 6: variable : ID
+
+i
+
+Line 6: factor : CONST_INT
+
+1
+
+Line 6: unary_expression : factor
+
+1
+
+Line 6: term : unary_expression
+
+1
+
+Line 6: simple_expression : term
+
+1
+
+Line 6: rel_expression : simple_expression
+
+1
+
+Line 6: logic_expression : rel_expression
+
+1
+
+Line 6: expression : variable ASSIGNOP logic_expression
+
+i=1
+
+Line 6: expression_statement : expression SEMICOLON
+
+i=1;
+
+Line 6: statement : expression_statement
+
+i=1;
+
+Line 6: statements : statements statement
+
+int i,j,k;
+i=1;
+
+Line 7: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(i);
+
+Line 7: statements : statements statement
+
+int i,j,k;
+i=1;
+printf(i);
+
+Line 9: variable : ID
+
+j
+
+Line 9: factor : CONST_INT
+
+5
+
+Line 9: unary_expression : factor
+
+5
+
+Line 9: term : unary_expression
+
+5
+
+Line 9: simple_expression : term
+
+5
+
+Line 9: factor : CONST_INT
+
+8
+
+Line 9: unary_expression : factor
+
+8
+
+Line 9: term : unary_expression
+
+8
+
+Line 9: simple_expression : simple_expression ADDOP term
+
+5+8
+
+Line 9: rel_expression : simple_expression
+
+5+8
+
+Line 9: logic_expression : rel_expression
+
+5+8
+
+Line 9: expression : variable ASSIGNOP logic_expression
+
+j=5+8
+
+Line 9: expression_statement : expression SEMICOLON
+
+j=5+8;
+
+Line 9: statement : expression_statement
+
+j=5+8;
+
+Line 9: statements : statements statement
+
+int i,j,k;
+i=1;
+printf(i);
+j=5+8;
+
+Line 10: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(j);
+
+Line 10: statements : statements statement
+
+int i,j,k;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+
+Line 11: variable : ID
+
+k
+
+Line 11: variable : ID
+
+i
+
+Line 11: factor : variable
+
+i
+
+Line 11: unary_expression : factor
+
+i
+
+Line 11: term : unary_expression
+
+i
+
+Line 11: simple_expression : term
+
+i
+
+Line 11: factor : CONST_INT
+
+2
+
+Line 11: unary_expression : factor
+
+2
+
+Line 11: term : unary_expression
+
+2
+
+Line 11: variable : ID
+
+j
+
+Line 11: factor : variable
+
+j
+
+Line 11: unary_expression : factor
+
+j
+
+Line 11: term : term MULOP unary_expression
+
+2*j
+
+Line 11: simple_expression : simple_expression ADDOP term
+
+i+2*j
+
+Line 11: rel_expression : simple_expression
+
+i+2*j
+
+Line 11: logic_expression : rel_expression
+
+i+2*j
+
+Line 11: expression : variable ASSIGNOP logic_expression
+
+k=i+2*j
+
+Line 11: expression_statement : expression SEMICOLON
+
+k=i+2*j;
+
+Line 11: statement : expression_statement
+
+k=i+2*j;
+
+Line 11: statements : statements statement
+
+int i,j,k;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+
+Line 12: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(k);
+
+Line 12: statements : statements statement
+
+int i,j,k;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+
+Line 35: factor : CONST_INT
+
+0
+
+Line 35: unary_expression : factor
+
+0
+
+Line 35: term : unary_expression
+
+0
+
+Line 35: simple_expression : term
+
+0
+
+Line 35: rel_expression : simple_expression
+
+0
+
+Line 35: logic_expression : rel_expression
+
+0
+
+Line 35: expression : logic_expression
+
+0
+
+Line 35: statement : RETURN expression SEMICOLON
+
+return 0;
+
+Line 35: statements : statements statement
+
+int i,j,k;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+return 0;
+
+Line 36: compound_statement : LCURL statements RCURL
+
+{
+int i,j,k;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+return 0;
+}
+
+
+ScopeTable# 1.1
+0 --> <i : ID> 
+1 --> <j : ID> 
+2 --> <k : ID> 
+
+ScopeTable# 1
+6 --> <main : ID> 
+
+Line 36: func_definition : type_specifier ID LPAREN RPAREN compound_statement
+
+int main(){
+int i,j,k;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+return 0;
+}
+
+
+Line 36: unit : func_definition
+
+int main(){
+int i,j,k;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+return 0;
+}
+
+
+
+Line 36: program : unit
+
+int main(){
+int i,j,k;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+return 0;
+}
+
+
+
+Line 38: start : program
+
+
+ScopeTable# 1
+6 --> <main : ID> 
+
+Total lines: 38
+Total errors: 0

@@ -1,11 +1,11 @@
 %{
 #include<iostream>
-#include<cstdio>
 #include<bits/stdc++.h>
 #include<cstdlib>
 #include<cstring>
 #include<cmath>
 #include "headers/SymbolTable.h"
+#include "util/AssemblyCode.h"
 
 using namespace std;
 
@@ -22,11 +22,20 @@ SymbolTable *symbolTable = new SymbolTable(7);
 FILE *fp;
 FILE *logFile;
 FILE *errorFile;
+FILE *asmCodeFile;
+FILE *asmCodeFileData;
+FILE *asmCodeFileCode;
+FILE *asmCodeFileProc;
 
 vector<SymbolInfo*> parametersList;
 vector<SymbolInfo*> argumentList;
 
 string typeName = "";
+string asmCode = "";
+string dataSegment = "";
+string codeSegment = "";
+
+int variableCount = 0;
 
 void yyerror(char *s)
 {
@@ -404,6 +413,15 @@ declaration_list : declaration_list COMMA ID {
 					$$ = $1;
 					$$ = new SymbolInfo($1->getName() + "," + $3->getName(), "declaration_list");
 
+					//AssemblyCode
+					variableCount++;
+					string variableNameForAsm = $3->getName() + "_" + to_string(variableCount);
+
+					$$->setAsmName(variableNameForAsm);
+					symbolTable->lookUp($3->getName())->setAsmName(variableNameForAsm);
+					asmCode = "\t" + variableNameForAsm + " DW ?";
+					printToDataAsmFile(asmCodeFileData, asmCode);
+
 				}
 				| declaration_list COMMA ID LTHIRD CONST_INT RTHIRD {
 					if (!symbolTable->insert($3->getName(), $3->getType(), typeName, 2)) {
@@ -425,6 +443,16 @@ declaration_list : declaration_list COMMA ID {
 
 					$$ = $1;
 					logFileText += "Line " + to_string(lineCount) + ": declaration_list : ID\n\n" + $1->getName() + "\n\n";
+
+
+					//AssemblyCode
+					variableCount++;
+					string variableNameForAsm = $1->getName() + "_" + to_string(variableCount);
+
+					$$->setAsmName(variableNameForAsm);
+					symbolTable->lookUp($1->getName())->setAsmName(variableNameForAsm);
+					asmCode = "\t" + variableNameForAsm + " DW ?";
+					printToDataAsmFile(asmCodeFileData, asmCode);
 
 				} 
 				| ID error {
@@ -504,6 +532,8 @@ statement : var_declaration {
 		}
 		| PRINTLN LPAREN ID RPAREN SEMICOLON {
 
+			string asmVariableName = "";
+
 			logFileText += "Line " + to_string(lineCount) + ": statement : PRINTLN LPAREN ID RPAREN SEMICOLON\n\n";
 
 			string output = "printf(" + $3->getName() + ");"; 
@@ -511,10 +541,21 @@ statement : var_declaration {
 				errorCount++;
 				logFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $3->getName() + "\n\n";
 				errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $3->getName() + "\n\n";
+			} else {
+				asmVariableName = symbolTable->lookUp($3->getName())->getAsmName();
 			}
 
 			logFileText += output + "\n\n";
 			$$ = new SymbolInfo(output, "STATEMENT");
+
+			//AssemblyCode
+			asmCode = "\tMOV CX, " + asmVariableName + "\n"
+					"\tMOV VAR_TO_PRINT, CX\n"
+					"\tCALL NEW_LINE\n"
+					"\tCALL PRINT_VAR\n"
+					"\tCALL NEW_LINE\n";
+			
+			printToCodeAsmFile(asmCodeFileCode, asmCode);
 
 		}
 		| RETURN expression SEMICOLON {
@@ -536,16 +577,19 @@ expression_statement : SEMICOLON {
 					;
 	  
 variable : ID {
+
+			string variableNameForAsm = "";
 			logFileText += "Line " + to_string(lineCount) + ": variable : ID\n\n";
 
 			SymbolInfo *tempSymbolInfo = symbolTable->lookUp($1->getName());
-
+			
 			if (tempSymbolInfo == nullptr) {
 				errorCount++;
 				logFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $1->getName() + "\n\n";
 				errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $1->getName() + "\n\n";
 
 			} else {
+				variableNameForAsm = tempSymbolInfo->getAsmName();
 				int variableType = tempSymbolInfo->getVarType();
 				// cout << tempSymbolInfo->getName() << tempSymbolInfo->getVarType() << endl;
 
@@ -558,7 +602,11 @@ variable : ID {
 
 			logFileText += $1->getName() + "\n\n";
 			
+			//AssemblyCode
+			$1->setAsmName(variableNameForAsm);
 			$$ = $1;
+			$$->setAsmName(variableNameForAsm);
+			
 		}
 		| ID LTHIRD expression RTHIRD 
 		{
@@ -651,6 +699,14 @@ expression : logic_expression {
 				logFileText += $1->getName() + "=" + $3->getName() + "\n\n";
 				typeName = "";
 				$$ = new SymbolInfo($1->getName() + "=" + $3->getName(), "expression");
+				
+
+				//AssemblyCode
+				asmCode = "\tPOP CX\n"
+						"\tMOV " + $1->getAsmName() + ", CX\n";
+				
+				printToCodeAsmFile(asmCodeFileCode, asmCode);
+
 			}	
 			;
 			
@@ -683,6 +739,15 @@ simple_expression : term {
 					$$ = $1;
 					$$->setName($1->getName() + $2->getName() + $3->getName());
 					$$->setType("SIMPLE_EXPRESSION");
+
+					//AssemblyCode
+					asmCode = "\tPOP BX\n"
+							"\tPOP AX\n"
+							"\tADD AX, BX\n"
+							"\tPUSH AX\n";
+
+					printToCodeAsmFile(asmCodeFileCode, asmCode);
+
 				} 
 				| simple_expression ADDOP error term {
 					logFileText += "Line " + to_string(lineCount) + ": simple_expression : simple_expression ADDOP term\n\n" + $1->getName() + $2->getName() + $4->getName() + "\n\n";
@@ -828,6 +893,9 @@ factor	: variable {
 		| CONST_INT {
 			logFileText += "Line " + to_string(lineCount) + ": factor : CONST_INT\n\n" + $1->getName() + "\n\n";
 			$$ = $1;
+
+			asmCode = "\tPUSH " + $1->getName() + "\n";
+			printToCodeAsmFile(asmCodeFileCode, asmCode);
 		}
 		| CONST_FLOAT {
 			logFileText += "Line " + to_string(lineCount) + ": factor : CONST_FLOAT\n\n" + $1->getName() + "\n\n";
@@ -883,8 +951,19 @@ int main(int argc,char *argv[])
 	logFile= fopen("log.txt","w");
 	errorFile= fopen("error.txt","w");	
 
+	asmCodeFile = fopen("code.asm", "w");
+	asmCodeFileData = fopen("dataCode.asm", "w+");
+	asmCodeFileCode = fopen("codeCode.asm", "w+");
+	asmCodeFileProc = fopen("procCode.asm", "w+");
+
+	initAsmFile(asmCodeFile);
+	initAsmProcFile(asmCodeFileProc);
+	initAsmCodeFile(asmCodeFileCode);
+
 	yyin=fp;
 	yyparse();
+
+	mergeFiles(asmCodeFile, asmCodeFileData, asmCodeFileCode, asmCodeFileProc); 
 
 	logFileText += symbolTable->printAllScopeTable();
 
@@ -900,6 +979,14 @@ int main(int argc,char *argv[])
 
 	fclose(logFile);
 	fclose(errorFile);
+	fclose(asmCodeFile);
+	fclose(asmCodeFileData);
+	fclose(asmCodeFileCode);
+	fclose(asmCodeFileProc);
+
+	remove("codeCode.asm");
+	remove("dataCode.asm");
+	remove("procCode.asm");
 	
 	return 0;
 }
