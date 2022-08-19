@@ -84,6 +84,9 @@ start : program
 	{
 		logFileText += "Line " + to_string(lineCount) + ": start : program\n\n\n";
 		$$ = $1;
+		asmCode = $1->getAsmCode();
+
+		printToCodeAsmFile(asmCodeFileCode, asmCode);
 	}
 	;
 
@@ -93,6 +96,8 @@ program : program unit {
 			logFileText += "\nLine " + to_string(lineCount) + ": program : program unit\n\n" + $1->getName() + "\n" + $2->getName() + "\n\n\n";
 			$$ = $1;
 			$$->setName($1->getName() + "\n" + $2->getName());
+
+			$$->setAsmCode($1->getAsmCode() + $2->getAsmCode());
 		}
 		| unit {
 			logFileText += "\nLine " + to_string(lineCount) + ": program : unit\n\n" + $1->getName() + "\n\n\n";
@@ -232,6 +237,8 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 			string output = $1->getName() + " " + $2->getName() + "()" + $6->getName();
 			logFileText += "Line " + to_string(lineCount) + ": func_definition : type_specifier ID LPAREN RPAREN compound_statement\n\n" + output + "\n\n";
 			$$ = new SymbolInfo(output, "func_definition");
+
+			$$->setAsmCode($6->getAsmCode());
 
 		}
  		;				
@@ -404,6 +411,10 @@ type_specifier	: INT {
  		
 declaration_list : declaration_list COMMA ID {
 
+					asmCode = "";
+
+					asmCode += $1->getAsmCode();
+
 					if (!symbolTable->insert($3->getName(), $3->getType(), typeName, 1)) {
 						errorCount++;
 						errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $3->getName() + "\n\n";
@@ -420,8 +431,10 @@ declaration_list : declaration_list COMMA ID {
 
 					$$->setAsmName(variableNameForAsm);
 					symbolTable->lookUp($3->getName())->setAsmName(variableNameForAsm);
-					asmCode = "\t" + variableNameForAsm + " DW ?";
+					asmCode += "\t" + variableNameForAsm + " DW ?";
 					printToDataAsmFile(asmCodeFileData, asmCode);
+
+					// $$->setAsmCode(asmCode);
 
 				}
 				| declaration_list COMMA ID LTHIRD CONST_INT RTHIRD {
@@ -436,6 +449,8 @@ declaration_list : declaration_list COMMA ID {
 					$$ = new SymbolInfo($1->getName() + "," + $3->getName() + "[" + $5->getName() + "]", "declaration_list");
 				}
  		  		| ID {
+					asmCode = "";
+
 					if (!symbolTable->insert($1->getName(), $1->getType(), typeName, 1)) {
 						errorCount++;
 						errorFileText += "Error at line " + to_string(lineCount) + ": Multiple declaration of " + $1->getName() + "\n\n";
@@ -452,8 +467,11 @@ declaration_list : declaration_list COMMA ID {
 
 					$$->setAsmName(variableNameForAsm);
 					symbolTable->lookUp($1->getName())->setAsmName(variableNameForAsm);
-					asmCode = "\t" + variableNameForAsm + " DW ?";
+					asmCode += "\t" + variableNameForAsm + " DW ?";
 					printToDataAsmFile(asmCodeFileData, asmCode);
+
+					// $$->setAsmCode(asmCode);
+
 
 				} 
 				| ID error {
@@ -484,9 +502,13 @@ statements : statement {
 				$$ = $1;
 			}
 			| statements statement {
+				asmCode = "";
+				asmCode += $1->getAsmCode() + $2->getAsmCode();
 				logFileText += "Line " + to_string(lineCount) + ": statements : statements statement\n\n" + $1->getName() + "\n" + $2->getName() + "\n\n";
 				$$ = $1;
 				$$->setName($1->getName() + "\n" + $2->getName());
+
+				$$->setAsmCode(asmCode);
 			}
 	   		;
 	   
@@ -511,18 +533,61 @@ statement : var_declaration {
 			$$->setName(output);
 		}
 		| IF LPAREN expression RPAREN statement %prec LOWER_THAN_ELSE {
+			asmCode = "";
+
+			asmCode += $3->getAsmCode();
+
 			string output = "if (" + $3->getName() + ")" + $5->getName(); 
 			logFileText += "Line " + to_string(lineCount) + ": statement : IF LPAREN expression RPAREN statement\n\n" + output + "\n\n";
 			$$ = $5;
 
 			$$->setName(output);
+
+			string newLabel1 = newLabel();
+
+			//AssemblyCode
+
+			asmCode += "\t;if (" + $3->getName() + ")\n";
+
+			asmCode += "\tPOP AX\n"
+						"\tCMP AX, 1\n"
+						"\tJNE " + newLabel1 + "\n"
+						"" + $5->getAsmCode() + "\n"
+						"" + newLabel1 + ":\n";
+			
+			$$->setAsmCode(asmCode);
+			$$->setAsmName("");
 		}
 		| IF LPAREN expression RPAREN statement ELSE statement {
+			asmCode = "";
+
+			asmCode += $3->getAsmCode();
+
 			string output = "if (" + $3->getName() + ")" + $5->getName() + "else\n" + $7->getName(); 
 			logFileText += "Line " + to_string(lineCount) + ": statement : IF LPAREN expression RPAREN statement ELSE statement\n\n" + output + "\n\n";
 			$$ = $7;
 
 			$$->setName(output);
+
+			string newLabel1 = newLabel();
+			string newLabel2 = newLabel();
+			string newLabel3 = newLabel();
+
+			//AssemblyCode
+
+			asmCode += "\t;if (" + $3->getName() + ") else\n";
+
+			asmCode += "\tPOP AX\n"
+						"\tCMP AX, 1\n"
+						"\tJNE " + newLabel1 + "\n"
+						"" + $5->getAsmCode() + "\n"
+						"\t JMP " + newLabel3 + "\n\n"
+						"" + newLabel1 + ":\n"
+						"" + $7->getAsmCode() + "\n\n"
+						"" + newLabel3 + ":\n";
+			
+			$$->setAsmCode(asmCode);
+			$$->setAsmName("");
 		}
 		| WHILE LPAREN expression RPAREN statement {
 			string output = "while (" + $3->getName() + ")" + $5->getName(); 
@@ -532,6 +597,8 @@ statement : var_declaration {
 			$$->setName(output);
 		}
 		| PRINTLN LPAREN ID RPAREN SEMICOLON {
+
+			asmCode = "";
 
 			string asmVariableName = "";
 
@@ -550,14 +617,15 @@ statement : var_declaration {
 			$$ = new SymbolInfo(output, "STATEMENT");
 
 			//AssemblyCode
-			asmCode = "\t;println(" + $3->getName() + ")\n"
+			asmCode += "\t;println(" + $3->getName() + ")\n"
 					"\tMOV CX, " + asmVariableName + "\n"
 					"\tMOV VAR_TO_PRINT, CX\n"
 					"\tCALL NEW_LINE\n"
 					"\tCALL PRINT_VAR\n"
 					"\tCALL NEW_LINE\n";
 			
-			printToCodeAsmFile(asmCodeFileCode, asmCode);
+			//printToCodeAsmFile(asmCodeFileCode, asmCode);
+			$$->setAsmCode(asmCode);
 
 		}
 		| RETURN expression SEMICOLON {
@@ -579,6 +647,8 @@ expression_statement : SEMICOLON {
 					;
 	  
 variable : ID {
+
+			asmCode = "";
 
 			string variableNameForAsm = "";
 			logFileText += "Line " + to_string(lineCount) + ": variable : ID\n\n";
@@ -605,7 +675,6 @@ variable : ID {
 			logFileText += $1->getName() + "\n\n";
 			
 			//AssemblyCode
-			$1->setAsmName(variableNameForAsm);
 			$$ = $1;
 			$$->setAsmName(variableNameForAsm);
 			
@@ -648,6 +717,10 @@ expression : logic_expression {
 					$$ = $1;
  			}
 			| variable ASSIGNOP logic_expression {
+				asmCode = "";
+
+				asmCode += $1->getAsmCode() + $3->getAsmCode();
+
 				string variableName;
 				string functionName;
 
@@ -704,11 +777,12 @@ expression : logic_expression {
 				
 
 				//AssemblyCode
-				asmCode = "\t;" + $1->getName() + " = " + $3->getName() + "\n"
+				asmCode += "\t;" + $1->getName() + " = " + $3->getName() + "\n"
 						"\tPOP CX\n"
 						"\tMOV " + $1->getAsmName() + ", CX\n";
 				
-				printToCodeAsmFile(asmCodeFileCode, asmCode);
+				//printToCodeAsmFile(asmCodeFileCode, asmCode);
+				$$->setAsmCode(asmCode);
 
 			}	
 			;
@@ -718,12 +792,16 @@ logic_expression : rel_expression {
 					$$ = $1;
 				}
 				| rel_expression LOGICOP rel_expression {
+					asmCode = "";
+
+					asmCode += $1->getAsmCode() + $3->getAsmCode();
+
 					logFileText += "Line " + to_string(lineCount) + ": logic_expression : rel_expression LOGICOP rel_expression\n\n" + $1->getName() + $2->getName() + $3->getName() + "\n\n";
 					$$ = new SymbolInfo($1->getName() + $2->getName() + $3->getName(), "LOGIC_EXPRESSION");
 
 					//AssemblyCode
 
-					asmCode = "\t;" + $1->getName() + " " + $2->getName() + " " + $3->getName() + "\n";
+					asmCode += "\t;" + $1->getName() + " " + $2->getName() + " " + $3->getName() + "\n";
 
 					if ($1->getAsmName() == "") {
 						asmCode += "\tPOP AX\n";
@@ -745,7 +823,8 @@ logic_expression : rel_expression {
 					
 					asmCode += "\tPUSH AX\n";
 					$$->setAsmName("");
-					printToCodeAsmFile(asmCodeFileCode, asmCode);
+					$$->setAsmCode(asmCode);
+					//printToCodeAsmFile(asmCodeFileCode, asmCode);
 				} 	
 				;
 			
@@ -754,13 +833,21 @@ rel_expression	: simple_expression {
 				$$ = $1;
 				}
 				| simple_expression RELOP simple_expression	{
+					
+					asmCode = "";
+
+					asmCode += $1->getAsmCode() + $3->getAsmCode();
+
 					logFileText += "Line " + to_string(lineCount) + ": rel_expression : simple_expression RELOP simple_expression\n\n" + $1->getName() + $2->getName() + $3->getName() + "\n\n";
 					$$ = new SymbolInfo($1->getName() + $2->getName() + $3->getName(),"RELOP_EXPRESSION");
 
 					//AssemblyCode
 					conditionCount++;
+
+					string newLabel1 = newLabel();
+					string newLabel2 = newLabel();
 					
-					asmCode = "\t;Check " + $1->getName() + " " + $2->getName() + " " + $3->getName() + "\n";
+					asmCode += "\t;Check " + $1->getName() + " " + $2->getName() + " " + $3->getName() + "\n";
 
 					if ($1->getAsmName() == "") {
 						asmCode += "\tPOP AX\n";
@@ -774,33 +861,58 @@ rel_expression	: simple_expression {
 					}
 					
 					if ($2->getName() == "<") {
-
+						asmCode += "\tCMP AX, BX\n"
+									"\tJL " + newLabel1 + "\n"
+									"\tPUSH 0\n"
+									"\tJMP " + newLabel2 + "\n\n"
+									"" + newLabel1 + ":\n"
+									"\tPUSH 1\n\n"
+									"" + newLabel2 + ":\n\n";
 					} else if ($2->getName() == "<=") {
 						asmCode += "\tCMP AX, BX\n"
-									"\tJLE COND_TRUE_" + to_string(conditionCount) + "\n"
+									"\tJLE " + newLabel1 + "\n"
 									"\tPUSH 0\n"
-									"\tJMP END_COND_" + to_string(conditionCount) + "\n\n"
-									"COND_TRUE_" + to_string(conditionCount) + ":\n"
+									"\tJMP " + newLabel2 + "\n\n"
+									"" + newLabel1 + ":\n"
 									"\tPUSH 1\n\n"
-									"END_COND_" + to_string(conditionCount) + ":\n\n";
+									"" + newLabel2 + ":\n\n";
 					} else if ($2->getName() == ">") {
-
+						asmCode += "\tCMP AX, BX\n"
+									"\tJG " + newLabel1 + "\n"
+									"\tPUSH 0\n"
+									"\tJMP " + newLabel2 + "\n\n"
+									"" + newLabel1 + ":\n"
+									"\tPUSH 1\n\n"
+									"" + newLabel2 + ":\n\n";
 					} else if ($2->getName() == ">=") {
-
+						asmCode += "\tCMP AX, BX\n"
+									"\tJGE " + newLabel1 + "\n"
+									"\tPUSH 0\n"
+									"\tJMP " + newLabel2 + "\n\n"
+									"" + newLabel1 + ":\n"
+									"\tPUSH 1\n\n"
+									"" + newLabel2 + ":\n\n";
 					} else if ($2->getName() == "==") {
-
+						asmCode += "\tCMP AX, BX\n"
+									"\tJE " + newLabel1 + "\n"
+									"\tPUSH 0\n"
+									"\tJMP " + newLabel2 + "\n\n"
+									"" + newLabel1 + ":\n"
+									"\tPUSH 1\n\n"
+									"" + newLabel2 + ":\n\n";
 					} else if ($2->getName() == "!=") {
 						asmCode += "\tCMP AX, BX\n"
-									"\tJNE COND_TRUE_" + to_string(conditionCount) + "\n"
+									"\tJNE " + newLabel1 + "\n"
 									"\tPUSH 0\n"
-									"\tJMP END_COND_" + to_string(conditionCount) + "\n\n"
-									"COND_TRUE_" + to_string(conditionCount) + ":\n"
+									"\tJMP " + newLabel2 + "\n\n"
+									"" + newLabel1 + ":\n"
 									"\tPUSH 1\n\n"
-									"END_COND_" + to_string(conditionCount) + ":\n\n";
+									"" + newLabel2 + ":\n\n";
 					}
 
 					$$->setAsmName("");
-					printToCodeAsmFile(asmCodeFileCode, asmCode);
+					$$->setAsmCode(asmCode);
+					//printToCodeAsmFile(asmCodeFileCode, asmCode);
 
 				}
 				;
@@ -811,6 +923,9 @@ simple_expression : term {
 				}
 				| simple_expression ADDOP term {
 					asmCode = "";
+
+					asmCode += $1->getAsmCode() + $3->getAsmCode();
+
 					string asmComment = "\t;" + $1->getName() + $2->getName() + $3->getName() + "\n";
 					
 					logFileText += "Line " + to_string(lineCount) + ": simple_expression : simple_expression ADDOP term\n\n" + $1->getName() + $2->getName() + $3->getName() + "\n\n";
@@ -839,8 +954,9 @@ simple_expression : term {
 							"\tPUSH AX\n";
 					}
 
-					printToCodeAsmFile(asmCodeFileCode, asmCode);
+					//printToCodeAsmFile(asmCodeFileCode, asmCode);
 					$$->setAsmName("");
+					$$->setAsmCode(asmCode);
 
 				} 
 				| simple_expression ADDOP error term {
@@ -856,6 +972,10 @@ term :	unary_expression {
 		$$ = $1;
 	}
     |  term MULOP unary_expression {
+
+		asmCode = "";
+
+		asmCode += $1->getAsmCode() + $3->getAsmCode();
 
 		string asmComment = "\t;" + $1->getName() + $2->getName() + $3->getName() + "\n";
 
@@ -896,7 +1016,7 @@ term :	unary_expression {
 		$$->setName($1->getName() + $2->getName() + $3->getName());
 
 		//AssemblyCode
-		asmCode = asmComment;
+		asmCode += asmComment;
 
 		if ($1->getAsmName() != "") {
 			asmCode += "\tMOV AX, " + $1->getAsmName() + "\n";
@@ -918,19 +1038,23 @@ term :	unary_expression {
 		}
 
 
-		printToCodeAsmFile(asmCodeFileCode, asmCode);
+		//printToCodeAsmFile(asmCodeFileCode, asmCode);
 		$$->setAsmName("");
+		$$->setAsmCode(asmCode);
 
 	}
     ;
 
 unary_expression : ADDOP unary_expression {
+			asmCode = "";
+			asmCode += $2->getAsmCode();
+
 			logFileText += "Line " + to_string(lineCount) + ": unary_expression : ADDOP unary_expression\n\n" + $1->getName() + $2->getName() + "\n\n";
 			$$ = $2;
 			$$->setName($1->getName() + $2->getName());
 
 			//AssemblyCode
-			asmCode = "\t;" + $$->getName() + "\n";
+			asmCode += "\t;" + $$->getName() + "\n";
 
 			if ($2->getAsmName() == "") {
 				asmCode += "\tPOP AX\n";
@@ -945,8 +1069,9 @@ unary_expression : ADDOP unary_expression {
 							"\tPUSH AX\n";
 			}
 
-			printToCodeAsmFile(asmCodeFileCode, asmCode);
+			//printToCodeAsmFile(asmCodeFileCode, asmCode);
 			$$->setAsmName("");
+			$$->setAsmCode(asmCode);
 
 		}  
 		| NOT unary_expression {
@@ -1035,43 +1160,54 @@ factor	: variable {
 			$$ = new SymbolInfo("(" + $2->getName() + ")", "factor");
 		}
 		| CONST_INT {
+			asmCode = "";
+
 			logFileText += "Line " + to_string(lineCount) + ": factor : CONST_INT\n\n" + $1->getName() + "\n\n";
 			$$ = $1;
 
-			asmCode = "\tPUSH " + $1->getName() + "\n";
-			printToCodeAsmFile(asmCodeFileCode, asmCode);
+			asmCode += "\tPUSH " + $1->getName() + "\n";
+			$$->setAsmCode(asmCode);
+			//printToCodeAsmFile(asmCodeFileCode, asmCode);
+
 		}
 		| CONST_FLOAT {
 			logFileText += "Line " + to_string(lineCount) + ": factor : CONST_FLOAT\n\n" + $1->getName() + "\n\n";
 			$$ = $1;
 		}
 		| variable INCOP {
+			asmCode = "";
+
 			logFileText += "Line " + to_string(lineCount) + ": factor : variable INCOP\n\n" + $1->getName() + "++" + "\n\n";
 			$$ = new SymbolInfo($1->getName() + "++", "factor");
 
 			//AssemblyCode
-			asmCode = "\t;" + $1->getName() + "++\n";
+			asmCode += "\t;" + $1->getName() + "++\n";
 
 			asmCode += "\tMOV AX, " + $1->getAsmName() + "\n"
 						"\tADD AX, 1\n"
 						"\tMOV " + $1->getAsmName() + ", AX\n";
 			
-			printToCodeAsmFile(asmCodeFileCode, asmCode);
+			//printToCodeAsmFile(asmCodeFileCode, asmCode);
 			$$->setAsmName($1->getAsmName());
+			$$->setAsmCode(asmCode);
 		}
 		| variable DECOP {
+			asmCode = "";
+
+
 			logFileText += "Line " + to_string(lineCount) + ": factor : variable DECOP\n\n" + $1->getName() + "--" + "\n\n";
 			$$ = new SymbolInfo($1->getName() + "--", "factor");
 
 			//AssemblyCode
-			asmCode = "\t;" + $1->getName() + "--\n";
+			asmCode += "\t;" + $1->getName() + "--\n";
 
 			asmCode += "\tMOV AX, " + $1->getAsmName() + "\n"
 						"\t SUB AX, 1\n";
 						"\t MOV " + $1->getAsmName() + ", AX\n";
 			
-			printToCodeAsmFile(asmCodeFileCode, asmCode);
+			//printToCodeAsmFile(asmCodeFileCode, asmCode);
 			$$->setAsmName($1->getAsmName());
+			$$->setAsmCode(asmCode);
 		}
 		;
 	

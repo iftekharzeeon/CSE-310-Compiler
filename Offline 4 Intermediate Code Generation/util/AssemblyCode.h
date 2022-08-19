@@ -76,6 +76,8 @@ string codeSegmentEnd = "\t;EXIT PROGRAM\n"
                         "\tINT 21H\n\n"
                         "\tMAIN ENDP\n";
 
+int numberOfLabel = 0;
+
 
 
 void printToAsmFile(FILE *asmCodeFile, string codeLine) {
@@ -133,6 +135,11 @@ void mergeFiles(FILE *asmCodeFile, FILE *asmCodeFileData, FILE *asmCodeFileCode,
 
     if (line) free(line);
 
+}
+
+string newLabel() {
+    numberOfLabel++;
+    return "label_" + to_string(numberOfLabel);
 }
 
 #endif
