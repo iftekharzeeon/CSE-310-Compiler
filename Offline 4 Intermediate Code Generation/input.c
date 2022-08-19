@@ -1,7 +1,7 @@
 int main(){
  
 	// int i,j,k,ll,m,n,o,p;
-	int i,j,k;
+	int i,j,k,ll,m,n,o,p;
  
 	i = 1;
 	println(i);
@@ -11,26 +11,26 @@ int main(){
 	k = i + 2*j;
 	println(k);
 
-	// m = k%9;
-	// println(m);
+	m = k%9;
+	println(m);
  
-	// n = m <= ll;
-	// println(n);
+	n = m <= ll;
+	println(n);
  
-	// o = i != j;
-	// println(o);
+	o = i != j;
+	println(o);
  
-	// p = n || o;
-	// println(p);
+	p = n || o;
+	println(p);
  
-	// p = n && o;
-	// println(p);
+	p = n && o;
+	println(p);
 	
-	// p++;
-	// println(p);
+	p++;
+	println(p);
  
-	// k = -p;
-	// println(k); 
+	k = -p;
+	println(k); 
  
 	return 0;
 }

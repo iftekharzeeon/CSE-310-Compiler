@@ -36,6 +36,7 @@ string dataSegment = "";
 string codeSegment = "";
 
 int variableCount = 0;
+int conditionCount = 0;
 
 void yyerror(char *s)
 {
@@ -549,7 +550,8 @@ statement : var_declaration {
 			$$ = new SymbolInfo(output, "STATEMENT");
 
 			//AssemblyCode
-			asmCode = "\tMOV CX, " + asmVariableName + "\n"
+			asmCode = "\t;println(" + $3->getName() + ")\n"
+					"\tMOV CX, " + asmVariableName + "\n"
 					"\tMOV VAR_TO_PRINT, CX\n"
 					"\tCALL NEW_LINE\n"
 					"\tCALL PRINT_VAR\n"
@@ -702,7 +704,8 @@ expression : logic_expression {
 				
 
 				//AssemblyCode
-				asmCode = "\tPOP CX\n"
+				asmCode = "\t;" + $1->getName() + " = " + $3->getName() + "\n"
+						"\tPOP CX\n"
 						"\tMOV " + $1->getAsmName() + ", CX\n";
 				
 				printToCodeAsmFile(asmCodeFileCode, asmCode);
@@ -717,6 +720,32 @@ logic_expression : rel_expression {
 				| rel_expression LOGICOP rel_expression {
 					logFileText += "Line " + to_string(lineCount) + ": logic_expression : rel_expression LOGICOP rel_expression\n\n" + $1->getName() + $2->getName() + $3->getName() + "\n\n";
 					$$ = new SymbolInfo($1->getName() + $2->getName() + $3->getName(), "LOGIC_EXPRESSION");
+
+					//AssemblyCode
+
+					asmCode = "\t;" + $1->getName() + " " + $2->getName() + " " + $3->getName() + "\n";
+
+					if ($1->getAsmName() == "") {
+						asmCode += "\tPOP AX\n";
+					} else {
+						asmCode += "\tMOV AX, " + $1->getAsmName() + "\n";
+					}
+					if ($3->getAsmName() == "") {
+						asmCode += "\tPOP BX\n";
+					} else {
+						asmCode += "\tMOV BX, " + $3->getAsmName() + "\n";
+					}
+
+					if ($2->getName() == "||") {
+						asmCode += "\tOR AX, BX\n";
+
+					} else if ($2->getName() == "&&") {
+						asmCode += "\tAND AX, BX\n";
+					}
+					
+					asmCode += "\tPUSH AX\n";
+					$$->setAsmName("");
+					printToCodeAsmFile(asmCodeFileCode, asmCode);
 				} 	
 				;
 			
@@ -727,6 +756,52 @@ rel_expression	: simple_expression {
 				| simple_expression RELOP simple_expression	{
 					logFileText += "Line " + to_string(lineCount) + ": rel_expression : simple_expression RELOP simple_expression\n\n" + $1->getName() + $2->getName() + $3->getName() + "\n\n";
 					$$ = new SymbolInfo($1->getName() + $2->getName() + $3->getName(),"RELOP_EXPRESSION");
+
+					//AssemblyCode
+					conditionCount++;
+					
+					asmCode = "\t;Check " + $1->getName() + " " + $2->getName() + " " + $3->getName() + "\n";
+
+					if ($1->getAsmName() == "") {
+						asmCode += "\tPOP AX\n";
+					} else {
+						asmCode += "\tMOV AX, " + $1->getAsmName() + "\n";
+					}
+					if ($3->getAsmName() == "") {
+						asmCode += "\tPOP BX\n";
+					} else {
+						asmCode += "\tMOV BX, " + $3->getAsmName() + "\n";
+					}
+					
+					if ($2->getName() == "<") {
+
+					} else if ($2->getName() == "<=") {
+						asmCode += "\tCMP AX, BX\n"
+									"\tJLE COND_TRUE_" + to_string(conditionCount) + "\n"
+									"\tPUSH 0\n"
+									"\tJMP END_COND_" + to_string(conditionCount) + "\n\n"
+									"COND_TRUE_" + to_string(conditionCount) + ":\n"
+									"\tPUSH 1\n\n"
+									"END_COND_" + to_string(conditionCount) + ":\n\n";
+					} else if ($2->getName() == ">") {
+
+					} else if ($2->getName() == ">=") {
+
+					} else if ($2->getName() == "==") {
+
+					} else if ($2->getName() == "!=") {
+						asmCode += "\tCMP AX, BX\n"
+									"\tJNE COND_TRUE_" + to_string(conditionCount) + "\n"
+									"\tPUSH 0\n"
+									"\tJMP END_COND_" + to_string(conditionCount) + "\n\n"
+									"COND_TRUE_" + to_string(conditionCount) + ":\n"
+									"\tPUSH 1\n\n"
+									"END_COND_" + to_string(conditionCount) + ":\n\n";
+					}
+
+					$$->setAsmName("");
+					printToCodeAsmFile(asmCodeFileCode, asmCode);
+
 				}
 				;
 				
@@ -735,18 +810,37 @@ simple_expression : term {
 					$$ = $1;
 				}
 				| simple_expression ADDOP term {
+					asmCode = "";
+					string asmComment = "\t;" + $1->getName() + $2->getName() + $3->getName() + "\n";
+					
 					logFileText += "Line " + to_string(lineCount) + ": simple_expression : simple_expression ADDOP term\n\n" + $1->getName() + $2->getName() + $3->getName() + "\n\n";
 					$$ = $1;
 					$$->setName($1->getName() + $2->getName() + $3->getName());
 					$$->setType("SIMPLE_EXPRESSION");
 
 					//AssemblyCode
-					asmCode = "\tPOP BX\n"
-							"\tPOP AX\n"
-							"\tADD AX, BX\n"
+					asmCode += asmComment;
+					if ($1->getAsmName() != "") {
+						asmCode += "\tMOV BX, " + $1->getAsmName() + "\n";
+					} else {
+						asmCode += "\tPOP BX\n";
+					}
+					if ($3->getAsmName() != "") {
+						asmCode += "\tMOV AX, " + $3->getAsmName() + "\n";
+					} else {
+						asmCode += "\tPOP AX\n";
+					}
+
+					if ($2->getName() == "+") {
+						asmCode += "\tADD AX, BX\n"
 							"\tPUSH AX\n";
+					} else if ($2->getName() == "-") {
+						asmCode += "\tSUB AX, BX\n"
+							"\tPUSH AX\n";
+					}
 
 					printToCodeAsmFile(asmCodeFileCode, asmCode);
+					$$->setAsmName("");
 
 				} 
 				| simple_expression ADDOP error term {
@@ -762,6 +856,9 @@ term :	unary_expression {
 		$$ = $1;
 	}
     |  term MULOP unary_expression {
+
+		string asmComment = "\t;" + $1->getName() + $2->getName() + $3->getName() + "\n";
+
 		logFileText += "Line " + to_string(lineCount) + ": term : term MULOP unary_expression\n\n";
 		// cout << $2->getName() << $3->getName() << endl;
 		if ($2->getName() == "%" && ($3->getType() == "CONST_FLOAT" || $1->getType() == "CONST_FLOAT")) {
@@ -797,6 +894,33 @@ term :	unary_expression {
 		logFileText += $1->getName() + $2->getName() + $3->getName() + "\n\n";
 		$$ = $1;
 		$$->setName($1->getName() + $2->getName() + $3->getName());
+
+		//AssemblyCode
+		asmCode = asmComment;
+
+		if ($1->getAsmName() != "") {
+			asmCode += "\tMOV AX, " + $1->getAsmName() + "\n";
+		} else {
+			asmCode += "\tPOP AX\n";
+		}
+		if ($3->getAsmName() != "") {
+			asmCode += "\tMOV BX, " + $3->getAsmName() + "\n";
+		} else {
+			asmCode += "\tPOP BX\n";
+		}
+		if ($2->getName() == "%") {
+			asmCode += "\tMOV DX, 0\n" 
+					"\tDIV BX\n"
+					"\tPUSH DX\n";
+		} else if ($2->getName() == "*") {
+			asmCode += "\tMUL BX\n"
+					"\tPUSH AX\n";
+		}
+
+
+		printToCodeAsmFile(asmCodeFileCode, asmCode);
+		$$->setAsmName("");
+
 	}
     ;
 
@@ -804,6 +928,26 @@ unary_expression : ADDOP unary_expression {
 			logFileText += "Line " + to_string(lineCount) + ": unary_expression : ADDOP unary_expression\n\n" + $1->getName() + $2->getName() + "\n\n";
 			$$ = $2;
 			$$->setName($1->getName() + $2->getName());
+
+			//AssemblyCode
+			asmCode = "\t;" + $$->getName() + "\n";
+
+			if ($2->getAsmName() == "") {
+				asmCode += "\tPOP AX\n";
+			} else {
+				asmCode += "\tMOV AX, " + $2->getAsmName() + "\n";
+			}
+
+			if ($1->getName() == "+") {
+				//Do nothing
+			} else if ($1->getName() == "-") {
+				asmCode += "\tNEG AX\n"
+							"\tPUSH AX\n";
+			}
+
+			printToCodeAsmFile(asmCodeFileCode, asmCode);
+			$$->setAsmName("");
+
 		}  
 		| NOT unary_expression {
 			logFileText += "Line " + to_string(lineCount) + ": unary_expression : NOT unary_expression\n\n" + "!" + $2->getName() + "\n\n";
@@ -904,10 +1048,30 @@ factor	: variable {
 		| variable INCOP {
 			logFileText += "Line " + to_string(lineCount) + ": factor : variable INCOP\n\n" + $1->getName() + "++" + "\n\n";
 			$$ = new SymbolInfo($1->getName() + "++", "factor");
+
+			//AssemblyCode
+			asmCode = "\t;" + $1->getName() + "++\n";
+
+			asmCode += "\tMOV AX, " + $1->getAsmName() + "\n"
+						"\tADD AX, 1\n"
+						"\tMOV " + $1->getAsmName() + ", AX\n";
+			
+			printToCodeAsmFile(asmCodeFileCode, asmCode);
+			$$->setAsmName($1->getAsmName());
 		}
 		| variable DECOP {
 			logFileText += "Line " + to_string(lineCount) + ": factor : variable DECOP\n\n" + $1->getName() + "--" + "\n\n";
 			$$ = new SymbolInfo($1->getName() + "--", "factor");
+
+			//AssemblyCode
+			asmCode = "\t;" + $1->getName() + "--\n";
+
+			asmCode += "\tMOV AX, " + $1->getAsmName() + "\n"
+						"\t SUB AX, 1\n";
+						"\t MOV " + $1->getAsmName() + ", AX\n";
+			
+			printToCodeAsmFile(asmCodeFileCode, asmCode);
+			$$->setAsmName($1->getAsmName());
 		}
 		;
 	

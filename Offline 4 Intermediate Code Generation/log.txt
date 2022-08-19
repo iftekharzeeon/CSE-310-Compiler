@@ -18,17 +18,37 @@ Line 4: declaration_list : declaration_list COMMA ID
 
 i,j,k
 
+Line 4: declaration_list : declaration_list COMMA ID
+
+i,j,k,ll
+
+Line 4: declaration_list : declaration_list COMMA ID
+
+i,j,k,ll,m
+
+Line 4: declaration_list : declaration_list COMMA ID
+
+i,j,k,ll,m,n
+
+Line 4: declaration_list : declaration_list COMMA ID
+
+i,j,k,ll,m,n,o
+
+Line 4: declaration_list : declaration_list COMMA ID
+
+i,j,k,ll,m,n,o,p
+
 Line 4: var_declaration : type_specifier declaration_list SEMICOLON
 
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 
 Line 4: statement : var_declaration
 
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 
 Line 4: statements : statement
 
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 
 Line 6: variable : ID
 
@@ -72,7 +92,7 @@ i=1;
 
 Line 6: statements : statements statement
 
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 i=1;
 
 Line 7: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
@@ -81,7 +101,7 @@ printf(i);
 
 Line 7: statements : statements statement
 
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 i=1;
 printf(i);
 
@@ -143,7 +163,7 @@ j=5+8;
 
 Line 9: statements : statements statement
 
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 i=1;
 printf(i);
 j=5+8;
@@ -154,7 +174,7 @@ printf(j);
 
 Line 10: statements : statements statement
 
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 i=1;
 printf(i);
 j=5+8;
@@ -238,7 +258,7 @@ k=i+2*j;
 
 Line 11: statements : statements statement
 
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 i=1;
 printf(i);
 j=5+8;
@@ -251,12 +271,693 @@ printf(k);
 
 Line 12: statements : statements statement
 
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 i=1;
 printf(i);
 j=5+8;
 printf(j);
 k=i+2*j;
+printf(k);
+
+Line 14: variable : ID
+
+m
+
+Line 14: variable : ID
+
+k
+
+Line 14: factor : variable
+
+k
+
+Line 14: unary_expression : factor
+
+k
+
+Line 14: term : unary_expression
+
+k
+
+Line 14: factor : CONST_INT
+
+9
+
+Line 14: unary_expression : factor
+
+9
+
+Line 14: term : term MULOP unary_expression
+
+k%9
+
+Line 14: simple_expression : term
+
+k%9
+
+Line 14: rel_expression : simple_expression
+
+k%9
+
+Line 14: logic_expression : rel_expression
+
+k%9
+
+Line 14: expression : variable ASSIGNOP logic_expression
+
+m=k%9
+
+Line 14: expression_statement : expression SEMICOLON
+
+m=k%9;
+
+Line 14: statement : expression_statement
+
+m=k%9;
+
+Line 14: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+
+Line 15: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(m);
+
+Line 15: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+
+Line 17: variable : ID
+
+n
+
+Line 17: variable : ID
+
+m
+
+Line 17: factor : variable
+
+m
+
+Line 17: unary_expression : factor
+
+m
+
+Line 17: term : unary_expression
+
+m
+
+Line 17: simple_expression : term
+
+m
+
+Line 17: variable : ID
+
+ll
+
+Line 17: factor : variable
+
+ll
+
+Line 17: unary_expression : factor
+
+ll
+
+Line 17: term : unary_expression
+
+ll
+
+Line 17: simple_expression : term
+
+ll
+
+Line 17: rel_expression : simple_expression RELOP simple_expression
+
+m<=ll
+
+Line 17: logic_expression : rel_expression
+
+m<=ll
+
+Line 17: expression : variable ASSIGNOP logic_expression
+
+n=m<=ll
+
+Line 17: expression_statement : expression SEMICOLON
+
+n=m<=ll;
+
+Line 17: statement : expression_statement
+
+n=m<=ll;
+
+Line 17: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+
+Line 18: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(n);
+
+Line 18: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+
+Line 20: variable : ID
+
+o
+
+Line 20: variable : ID
+
+i
+
+Line 20: factor : variable
+
+i
+
+Line 20: unary_expression : factor
+
+i
+
+Line 20: term : unary_expression
+
+i
+
+Line 20: simple_expression : term
+
+i
+
+Line 20: variable : ID
+
+j
+
+Line 20: factor : variable
+
+j
+
+Line 20: unary_expression : factor
+
+j
+
+Line 20: term : unary_expression
+
+j
+
+Line 20: simple_expression : term
+
+j
+
+Line 20: rel_expression : simple_expression RELOP simple_expression
+
+i!=j
+
+Line 20: logic_expression : rel_expression
+
+i!=j
+
+Line 20: expression : variable ASSIGNOP logic_expression
+
+o=i!=j
+
+Line 20: expression_statement : expression SEMICOLON
+
+o=i!=j;
+
+Line 20: statement : expression_statement
+
+o=i!=j;
+
+Line 20: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+
+Line 21: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(o);
+
+Line 21: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+
+Line 23: variable : ID
+
+p
+
+Line 23: variable : ID
+
+n
+
+Line 23: factor : variable
+
+n
+
+Line 23: unary_expression : factor
+
+n
+
+Line 23: term : unary_expression
+
+n
+
+Line 23: simple_expression : term
+
+n
+
+Line 23: rel_expression : simple_expression
+
+n
+
+Line 23: variable : ID
+
+o
+
+Line 23: factor : variable
+
+o
+
+Line 23: unary_expression : factor
+
+o
+
+Line 23: term : unary_expression
+
+o
+
+Line 23: simple_expression : term
+
+o
+
+Line 23: rel_expression : simple_expression
+
+o
+
+Line 23: logic_expression : rel_expression LOGICOP rel_expression
+
+n||o
+
+Line 23: expression : variable ASSIGNOP logic_expression
+
+p=n||o
+
+Line 23: expression_statement : expression SEMICOLON
+
+p=n||o;
+
+Line 23: statement : expression_statement
+
+p=n||o;
+
+Line 23: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+
+Line 24: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(p);
+
+Line 24: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+printf(p);
+
+Line 26: variable : ID
+
+p
+
+Line 26: variable : ID
+
+n
+
+Line 26: factor : variable
+
+n
+
+Line 26: unary_expression : factor
+
+n
+
+Line 26: term : unary_expression
+
+n
+
+Line 26: simple_expression : term
+
+n
+
+Line 26: rel_expression : simple_expression
+
+n
+
+Line 26: variable : ID
+
+o
+
+Line 26: factor : variable
+
+o
+
+Line 26: unary_expression : factor
+
+o
+
+Line 26: term : unary_expression
+
+o
+
+Line 26: simple_expression : term
+
+o
+
+Line 26: rel_expression : simple_expression
+
+o
+
+Line 26: logic_expression : rel_expression LOGICOP rel_expression
+
+n&&o
+
+Line 26: expression : variable ASSIGNOP logic_expression
+
+p=n&&o
+
+Line 26: expression_statement : expression SEMICOLON
+
+p=n&&o;
+
+Line 26: statement : expression_statement
+
+p=n&&o;
+
+Line 26: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+printf(p);
+p=n&&o;
+
+Line 27: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(p);
+
+Line 27: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+printf(p);
+p=n&&o;
+printf(p);
+
+Line 29: variable : ID
+
+p
+
+Line 29: factor : variable INCOP
+
+p++
+
+Line 29: unary_expression : factor
+
+p++
+
+Line 29: term : unary_expression
+
+p++
+
+Line 29: simple_expression : term
+
+p++
+
+Line 29: rel_expression : simple_expression
+
+p++
+
+Line 29: logic_expression : rel_expression
+
+p++
+
+Line 29: expression : logic_expression
+
+p++
+
+Line 29: expression_statement : expression SEMICOLON
+
+p++;
+
+Line 29: statement : expression_statement
+
+p++;
+
+Line 29: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+printf(p);
+p=n&&o;
+printf(p);
+p++;
+
+Line 30: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(p);
+
+Line 30: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+printf(p);
+p=n&&o;
+printf(p);
+p++;
+printf(p);
+
+Line 32: variable : ID
+
+k
+
+Line 32: variable : ID
+
+p
+
+Line 32: factor : variable
+
+p
+
+Line 32: unary_expression : factor
+
+p
+
+Line 32: unary_expression : ADDOP unary_expression
+
+-p
+
+Line 32: term : unary_expression
+
+-p
+
+Line 32: simple_expression : term
+
+-p
+
+Line 32: rel_expression : simple_expression
+
+-p
+
+Line 32: logic_expression : rel_expression
+
+-p
+
+Line 32: expression : variable ASSIGNOP logic_expression
+
+k=-p
+
+Line 32: expression_statement : expression SEMICOLON
+
+k=-p;
+
+Line 32: statement : expression_statement
+
+k=-p;
+
+Line 32: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+printf(p);
+p=n&&o;
+printf(p);
+p++;
+printf(p);
+k=-p;
+
+Line 33: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(k);
+
+Line 33: statements : statements statement
+
+int i,j,k,ll,m,n,o,p;
+i=1;
+printf(i);
+j=5+8;
+printf(j);
+k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+printf(p);
+p=n&&o;
+printf(p);
+p++;
+printf(p);
+k=-p;
 printf(k);
 
 Line 35: factor : CONST_INT
@@ -293,33 +994,64 @@ return 0;
 
 Line 35: statements : statements statement
 
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 i=1;
 printf(i);
 j=5+8;
 printf(j);
 k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+printf(p);
+p=n&&o;
+printf(p);
+p++;
+printf(p);
+k=-p;
 printf(k);
 return 0;
 
 Line 36: compound_statement : LCURL statements RCURL
 
 {
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 i=1;
 printf(i);
 j=5+8;
 printf(j);
 k=i+2*j;
 printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+printf(p);
+p=n&&o;
+printf(p);
+p++;
+printf(p);
+k=-p;
+printf(k);
 return 0;
 }
 
 
 ScopeTable# 1.1
-0 --> <i : ID> 
+0 --> <i : ID> <p : ID> 
 1 --> <j : ID> 
-2 --> <k : ID> 
+2 --> <k : ID> <ll : ID> 
+4 --> <m : ID> 
+5 --> <n : ID> 
+6 --> <o : ID> 
 
 ScopeTable# 1
 6 --> <main : ID> 
@@ -327,12 +1059,26 @@ ScopeTable# 1
 Line 36: func_definition : type_specifier ID LPAREN RPAREN compound_statement
 
 int main(){
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 i=1;
 printf(i);
 j=5+8;
 printf(j);
 k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+printf(p);
+p=n&&o;
+printf(p);
+p++;
+printf(p);
+k=-p;
 printf(k);
 return 0;
 }
@@ -341,12 +1087,26 @@ return 0;
 Line 36: unit : func_definition
 
 int main(){
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 i=1;
 printf(i);
 j=5+8;
 printf(j);
 k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+printf(p);
+p=n&&o;
+printf(p);
+p++;
+printf(p);
+k=-p;
 printf(k);
 return 0;
 }
@@ -356,12 +1116,26 @@ return 0;
 Line 36: program : unit
 
 int main(){
-int i,j,k;
+int i,j,k,ll,m,n,o,p;
 i=1;
 printf(i);
 j=5+8;
 printf(j);
 k=i+2*j;
+printf(k);
+m=k%9;
+printf(m);
+n=m<=ll;
+printf(n);
+o=i!=j;
+printf(o);
+p=n||o;
+printf(p);
+p=n&&o;
+printf(p);
+p++;
+printf(p);
+k=-p;
 printf(k);
 return 0;
 }

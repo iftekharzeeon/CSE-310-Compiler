@@ -10,6 +10,11 @@
 	i_1 DW ?
 	j_2 DW ?
 	k_3 DW ?
+	ll_4 DW ?
+	m_5 DW ?
+	n_6 DW ?
+	o_7 DW ?
+	p_8 DW ?
 
 .CODE
 MAIN PROC
@@ -20,9 +25,11 @@ MAIN PROC
 
 	PUSH 1
 
+	;i = 1
 	POP CX
 	MOV i_1, CX
 
+	;println(i)
 	MOV CX, i_1
 	MOV VAR_TO_PRINT, CX
 	CALL NEW_LINE
@@ -33,14 +40,17 @@ MAIN PROC
 
 	PUSH 8
 
+	;5+8
 	POP BX
 	POP AX
 	ADD AX, BX
 	PUSH AX
 
+	;j = 5+8
 	POP CX
 	MOV j_2, CX
 
+	;println(j)
 	MOV CX, j_2
 	MOV VAR_TO_PRINT, CX
 	CALL NEW_LINE
@@ -49,14 +59,155 @@ MAIN PROC
 
 	PUSH 2
 
-	POP BX
+	;2*j
+	POP AX
+	MOV BX, j_2
+	MUL BX
+	PUSH AX
+
+	;i+2*j
+	MOV BX, i_1
 	POP AX
 	ADD AX, BX
 	PUSH AX
 
+	;k = i+2*j
 	POP CX
 	MOV k_3, CX
 
+	;println(k)
+	MOV CX, k_3
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+
+	PUSH 9
+
+	;k%9
+	MOV AX, k_3
+	POP BX
+	MOV DX, 0
+	DIV BX
+	PUSH DX
+
+	;m = k%9
+	POP CX
+	MOV m_5, CX
+
+	;println(m)
+	MOV CX, m_5
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+
+	;Check m <= ll
+	MOV AX, m_5
+	MOV BX, ll_4
+	CMP AX, BX
+	JLE COND_TRUE_1
+	PUSH 0
+	JMP END_COND_1
+
+COND_TRUE_1:
+	PUSH 1
+
+END_COND_1:
+
+
+	;n = m<=ll
+	POP CX
+	MOV n_6, CX
+
+	;println(n)
+	MOV CX, n_6
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+
+	;Check i != j
+	MOV AX, i_1
+	MOV BX, j_2
+	CMP AX, BX
+	JNE COND_TRUE_2
+	PUSH 0
+	JMP END_COND_2
+
+COND_TRUE_2:
+	PUSH 1
+
+END_COND_2:
+
+
+	;o = i!=j
+	POP CX
+	MOV o_7, CX
+
+	;println(o)
+	MOV CX, o_7
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+
+	;n || o
+	MOV AX, n_6
+	MOV BX, o_7
+	OR AX, BX
+	PUSH AX
+
+	;p = n||o
+	POP CX
+	MOV p_8, CX
+
+	;println(p)
+	MOV CX, p_8
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+
+	;n && o
+	MOV AX, n_6
+	MOV BX, o_7
+	AND AX, BX
+	PUSH AX
+
+	;p = n&&o
+	POP CX
+	MOV p_8, CX
+
+	;println(p)
+	MOV CX, p_8
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+
+	;p++
+	MOV AX, p_8
+	ADD AX, 1
+	MOV p_8, AX
+
+	;println(p)
+	MOV CX, p_8
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+
+	;-p
+	MOV AX, p_8
+	NEG AX
+	PUSH AX
+
+	;k = -p
+	POP CX
+	MOV k_3, CX
+
+	;println(k)
 	MOV CX, k_3
 	MOV VAR_TO_PRINT, CX
 	CALL NEW_LINE
