@@ -526,11 +526,41 @@ statement : var_declaration {
 
 		}
 		| FOR LPAREN expression_statement expression_statement expression RPAREN statement {
+			asmCode = "";
+
 			string output = "for(" + $3->getName() + $4->getName() + $5->getName() + ")" + $7->getName(); 
 			logFileText += "Line " + to_string(lineCount) + ": statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement\n\n" + output + "\n\n";
 			$$ = $7;
 
 			$$->setName(output);
+
+			string newLabel1 = newLabel();
+			string newLabel2 = newLabel();
+			string newLabel3 = newLabel();
+
+			//AssemblyCode
+
+			string initializationPart = $3->getAsmCode();
+			string checkingPart = $4->getAsmCode();
+			string incDecPart = $5->getAsmCode();
+			string statement = $7->getAsmCode();
+
+			asmCode += "\t;for(" + $3->getName() + $4->getName() + $5->getName() + ")\n";
+
+			asmCode += initializationPart;
+			asmCode += newLabel1 + ":\n";
+			asmCode += checkingPart;
+			asmCode += "\tPOP AX\n"
+						"\tCMP AX, 1\n"
+						"\tJGE " + newLabel2 + "\n"
+						"\tJMP " + newLabel3 + "\n"
+						"" + newLabel2 + ":\n";
+			asmCode += statement;
+			asmCode += incDecPart;
+			asmCode += "\tJMP " + newLabel1 + "\n";
+			asmCode += newLabel3 + ":\n";
+
+			$$->setAsmCode(asmCode);
 		}
 		| IF LPAREN expression RPAREN statement %prec LOWER_THAN_ELSE {
 			asmCode = "";
@@ -581,7 +611,7 @@ statement : var_declaration {
 						"\tCMP AX, 1\n"
 						"\tJNE " + newLabel1 + "\n"
 						"" + $5->getAsmCode() + "\n"
-						"\t JMP " + newLabel3 + "\n\n"
+						"\tJMP " + newLabel3 + "\n\n"
 						"" + newLabel1 + ":\n"
 						"" + $7->getAsmCode() + "\n\n"
 						"" + newLabel3 + ":\n";
@@ -590,11 +620,37 @@ statement : var_declaration {
 			$$->setAsmName("");
 		}
 		| WHILE LPAREN expression RPAREN statement {
+			asmCode = "";
+
 			string output = "while (" + $3->getName() + ")" + $5->getName(); 
 			logFileText += "Line " + to_string(lineCount) + ": statement : WHILE LPAREN expression RPAREN statement\n\n" + output + "\n\n";
 			$$ = $5;
 
 			$$->setName(output);
+
+			//AssemblyCode
+
+			string newLabel1 = newLabel();
+			string newLabel2 = newLabel();
+			string newLabel3 = newLabel();
+
+			string checkingPart = $3->getAsmCode();
+			string statement = $5->getAsmCode();
+
+			asmCode += newLabel1 + ":\n";
+			asmCode += checkingPart;
+			asmCode += "\tPOP AX\n"
+						"\tCMP AX, 1\n"
+						"\tJGE " + newLabel2 + "\n"
+						"\tJMP " + newLabel3 + "\n"
+						"" + newLabel2 + ":\n";
+			
+			asmCode += statement;
+			asmCode += "\tJMP " + newLabel1 + "\n";
+			asmCode += newLabel3 + ":\n";
+
+			$$->setAsmCode(asmCode);
+
 		}
 		| PRINTLN LPAREN ID RPAREN SEMICOLON {
 
@@ -1202,8 +1258,9 @@ factor	: variable {
 			asmCode += "\t;" + $1->getName() + "--\n";
 
 			asmCode += "\tMOV AX, " + $1->getAsmName() + "\n"
-						"\t SUB AX, 1\n";
-						"\t MOV " + $1->getAsmName() + ", AX\n";
+						"\tSUB AX, 1\n"
+						"\tMOV " + $1->getAsmName() + ", AX\n"
+						"\tPUSH AX\n";
 			
 			//printToCodeAsmFile(asmCodeFileCode, asmCode);
 			$$->setAsmName($1->getAsmName());
