@@ -7,10 +7,13 @@
 	VAR_TO_PRINT DW ?
 	COUNT DW ?
 
-	i_1 DW ?
-	j_2 DW ?
-	k_3 DW ?
-	ll_4 DW ?
+	a_1 DW ?
+	b_2 DW ?
+	c_3 DW ?
+	i_4 DW ?
+	j_5 DW ?
+	k_6 DW ?
+	l_7 DW ?
 
 .CODE
 MAIN PROC
@@ -19,44 +22,18 @@ MAIN PROC
 	MOV DS, AX
 
 
-	PUSH 4
-	;k = 4
+	PUSH 5
+	;i = 5
 	POP CX
-	MOV k_3, CX
+	MOV i_4, CX
 	PUSH 6
-	;ll = 6
+	;j = 6
 	POP CX
-	MOV ll_4, CX
-label_1:
-	;k--
-	MOV AX, k_3
-	SUB AX, 1
-	MOV k_3, AX
-	PUSH AX
-	POP AX
-	CMP AX, 1
-	JGE label_2
-	JMP label_3
-label_2:
-	PUSH 3
-	;ll+3
-	MOV BX, ll_4
-	POP AX
-	ADD AX, BX
-	PUSH AX
-	;ll = ll+3
-	POP CX
-	MOV ll_4, CX
-	JMP label_1
-label_3:
-	;println(ll)
-	MOV CX, ll_4
-	MOV VAR_TO_PRINT, CX
-	CALL NEW_LINE
-	CALL PRINT_VAR
-	CALL NEW_LINE
-	;println(k)
-	MOV CX, k_3
+	MOV j_5, CX
+	;Call Proc func_a
+	CALL FUNC_A
+	;println(a)
+	MOV CX, a_1
 	MOV VAR_TO_PRINT, CX
 	CALL NEW_LINE
 	CALL PRINT_VAR
@@ -138,5 +115,16 @@ NEW_LINE PROC
 
 	NEW_LINE ENDP
 
+
+FUNC_A PROC
+
+	PUSH 7
+	;a = 7
+	POP CX
+	MOV a_1, CX
+
+	RET
+
+FUNC_A ENDP
 
 END MAIN

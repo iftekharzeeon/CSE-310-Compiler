@@ -234,11 +234,26 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 			}
 		}
 		compound_statement {
+			asmCode = "";
+
 			string output = $1->getName() + " " + $2->getName() + "()" + $6->getName();
 			logFileText += "Line " + to_string(lineCount) + ": func_definition : type_specifier ID LPAREN RPAREN compound_statement\n\n" + output + "\n\n";
 			$$ = new SymbolInfo(output, "func_definition");
+			
+			if ($2->getName() == "main") {
+				$$->setAsmCode($6->getAsmCode());
+			} else {
+				string functionName = $2->getName();
+				transform(functionName.begin(), functionName.end(), functionName.begin(), ::toupper);
 
-			$$->setAsmCode($6->getAsmCode());
+				asmCode += functionName + " PROC\n\n";
+				asmCode += $6->getAsmCode();
+				asmCode += "\n\tRET\n\n"
+							"" + functionName + " ENDP\n";
+				
+				printToProcAsmFile(asmCodeFileProc, asmCode);
+
+			}
 
 		}
  		;				
@@ -1146,6 +1161,8 @@ factor	: variable {
 			$$ = $1;
 		}
 		| ID LPAREN argument_list RPAREN {
+			asmCode = "";
+
 			logFileText += "Line " + to_string(lineCount) + ": factor : ID LPAREN argument_list RPAREN\n\n";
 
 			SymbolInfo *s1 = symbolTable->lookUp($1->getName());
@@ -1210,6 +1227,15 @@ factor	: variable {
 
 			logFileText += $1->getName() + "(" + $3->getName() + ")" + "\n\n";
 			$$ = new SymbolInfo($1->getName() + "(" + $3->getName() + ")", "FUNCTION");
+
+			//AssemblyCode
+			string procName = $1->getName();
+			asmCode = "\t;Call Proc " + procName + "\n";
+			transform(procName.begin(), procName.end(), procName.begin(), ::toupper);
+
+			asmCode += "\tCALL " + procName + "\n";
+
+			$$->setAsmCode(asmCode);
 		}
 		| LPAREN expression RPAREN {
 			logFileText += "Line " + to_string(lineCount) + ": factor : LPAREN expression RPAREN\n\n" + "(" + $2->getName() + ")" + "\n\n";
