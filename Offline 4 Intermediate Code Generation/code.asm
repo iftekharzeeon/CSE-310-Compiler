@@ -30,9 +30,9 @@ MAIN PROC
 	;k = 6
 	POP CX
 	MOV k_3, CX
-	PUSH 3
-	;Check i == 3
-	MOV AX, i_1
+	PUSH 6
+	;Check k == 6
+	MOV AX, k_3
 	POP BX
 	CMP AX, BX
 	JE label_1
@@ -44,10 +44,38 @@ label_1:
 
 label_2:
 
-	;if (i==3)
+	;if (k==6) else
 	POP AX
 	CMP AX, 1
-	JNE label_3
+	JNE label_13
+	;println(k)
+	MOV CX, k_3
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+
+	 JMP label_15
+
+label_13:
+	PUSH 8
+	;Check j > 8
+	MOV AX, j_2
+	POP BX
+	CMP AX, BX
+	JG label_3
+	PUSH 0
+	JMP label_4
+
+label_3:
+	PUSH 1
+
+label_4:
+
+	;if (j>8) else
+	POP AX
+	CMP AX, 1
+	JNE label_10
 	;println(j)
 	MOV CX, j_2
 	MOV VAR_TO_PRINT, CX
@@ -55,25 +83,27 @@ label_2:
 	CALL PRINT_VAR
 	CALL NEW_LINE
 
-label_3:
-	PUSH 8
-	;Check j < 8
-	MOV AX, j_2
+	 JMP label_12
+
+label_10:
+	PUSH 5
+	;Check i < 5
+	MOV AX, i_1
 	POP BX
 	CMP AX, BX
-	JL label_4
+	JL label_5
 	PUSH 0
-	JMP label_5
-
-label_4:
-	PUSH 1
+	JMP label_6
 
 label_5:
+	PUSH 1
 
-	;if (j<8) else
+label_6:
+
+	;if (i<5) else
 	POP AX
 	CMP AX, 1
-	JNE label_6
+	JNE label_7
 	;println(i)
 	MOV CX, i_1
 	MOV VAR_TO_PRINT, CX
@@ -81,9 +111,13 @@ label_5:
 	CALL PRINT_VAR
 	CALL NEW_LINE
 
-	 JMP label_8
+	 JMP label_9
 
-label_6:
+label_7:
+	PUSH 0
+	;k = 0
+	POP CX
+	MOV k_3, CX
 	;println(k)
 	MOV CX, k_3
 	MOV VAR_TO_PRINT, CX
@@ -92,7 +126,13 @@ label_6:
 	CALL NEW_LINE
 
 
-label_8:
+label_9:
+
+
+label_12:
+
+
+label_15:
 	PUSH 0
 
 	;EXIT PROGRAM

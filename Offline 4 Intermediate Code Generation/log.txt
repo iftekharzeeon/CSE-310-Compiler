@@ -168,66 +168,66 @@ i=3;
 j=8;
 k=6;
 
-Line 10: variable : ID
+Line 21: variable : ID
 
-i
+k
 
-Line 10: factor : variable
+Line 21: factor : variable
 
-i
+k
 
-Line 10: unary_expression : factor
+Line 21: unary_expression : factor
 
-i
+k
 
-Line 10: term : unary_expression
+Line 21: term : unary_expression
 
-i
+k
 
-Line 10: simple_expression : term
+Line 21: simple_expression : term
 
-i
+k
 
-Line 10: factor : CONST_INT
+Line 21: factor : CONST_INT
 
-3
+6
 
-Line 10: unary_expression : factor
+Line 21: unary_expression : factor
 
-3
+6
 
-Line 10: term : unary_expression
+Line 21: term : unary_expression
 
-3
+6
 
-Line 10: simple_expression : term
+Line 21: simple_expression : term
 
-3
+6
 
-Line 10: rel_expression : simple_expression RELOP simple_expression
+Line 21: rel_expression : simple_expression RELOP simple_expression
 
-i==3
+k==6
 
-Line 10: logic_expression : rel_expression
+Line 21: logic_expression : rel_expression
 
-i==3
+k==6
 
-Line 10: expression : logic_expression
+Line 21: expression : logic_expression
 
-i==3
+k==6
 
-Line 11: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+Line 22: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
 
-printf(j);
+printf(k);
 
-Line 11: statements : statement
+Line 22: statements : statement
 
-printf(j);
+printf(k);
 
-Line 12: compound_statement : LCURL statements RCURL
+Line 23: compound_statement : LCURL statements RCURL
 
 {
-printf(j);
+printf(k);
 }
 
 
@@ -241,91 +241,73 @@ ScopeTable# 1.1
 ScopeTable# 1
 6 --> <main : ID> 
 
-Line 12: statement : compound_statement
+Line 23: statement : compound_statement
+
+{
+printf(k);
+}
+
+
+Line 24: variable : ID
+
+j
+
+Line 24: factor : variable
+
+j
+
+Line 24: unary_expression : factor
+
+j
+
+Line 24: term : unary_expression
+
+j
+
+Line 24: simple_expression : term
+
+j
+
+Line 24: factor : CONST_INT
+
+8
+
+Line 24: unary_expression : factor
+
+8
+
+Line 24: term : unary_expression
+
+8
+
+Line 24: simple_expression : term
+
+8
+
+Line 24: rel_expression : simple_expression RELOP simple_expression
+
+j>8
+
+Line 24: logic_expression : rel_expression
+
+j>8
+
+Line 24: expression : logic_expression
+
+j>8
+
+Line 25: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(j);
+
+Line 25: statements : statement
+
+printf(j);
+
+Line 26: compound_statement : LCURL statements RCURL
 
 {
 printf(j);
-}
-
-
-Line 14: statement : IF LPAREN expression RPAREN statement
-
-if (i==3){
-printf(j);
-}
-
-
-Line 14: statements : statements statement
-
-int i,j,k;
-i=3;
-j=8;
-k=6;
-if (i==3){
-printf(j);
-}
-
-
-Line 14: variable : ID
-
-j
-
-Line 14: factor : variable
-
-j
-
-Line 14: unary_expression : factor
-
-j
-
-Line 14: term : unary_expression
-
-j
-
-Line 14: simple_expression : term
-
-j
-
-Line 14: factor : CONST_INT
-
-8
-
-Line 14: unary_expression : factor
-
-8
-
-Line 14: term : unary_expression
-
-8
-
-Line 14: simple_expression : term
-
-8
-
-Line 14: rel_expression : simple_expression RELOP simple_expression
-
-j<8
-
-Line 14: logic_expression : rel_expression
-
-j<8
-
-Line 14: expression : logic_expression
-
-j<8
-
-Line 15: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
-
-printf(i);
-
-Line 15: statements : statement
-
-printf(i);
-
-Line 16: compound_statement : LCURL statements RCURL
-
-{
-printf(i);
 }
 
 
@@ -339,25 +321,73 @@ ScopeTable# 1.1
 ScopeTable# 1
 6 --> <main : ID> 
 
-Line 16: statement : compound_statement
+Line 26: statement : compound_statement
 
 {
-printf(i);
+printf(j);
 }
 
 
-Line 18: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+Line 27: variable : ID
 
-printf(k);
+i
 
-Line 18: statements : statement
+Line 27: factor : variable
 
-printf(k);
+i
 
-Line 19: compound_statement : LCURL statements RCURL
+Line 27: unary_expression : factor
+
+i
+
+Line 27: term : unary_expression
+
+i
+
+Line 27: simple_expression : term
+
+i
+
+Line 27: factor : CONST_INT
+
+5
+
+Line 27: unary_expression : factor
+
+5
+
+Line 27: term : unary_expression
+
+5
+
+Line 27: simple_expression : term
+
+5
+
+Line 27: rel_expression : simple_expression RELOP simple_expression
+
+i<5
+
+Line 27: logic_expression : rel_expression
+
+i<5
+
+Line 27: expression : logic_expression
+
+i<5
+
+Line 28: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(i);
+
+Line 28: statements : statement
+
+printf(i);
+
+Line 29: compound_statement : LCURL statements RCURL
 
 {
-printf(k);
+printf(i);
 }
 
 
@@ -371,39 +401,160 @@ ScopeTable# 1.1
 ScopeTable# 1
 6 --> <main : ID> 
 
-Line 19: statement : compound_statement
+Line 29: statement : compound_statement
 
 {
+printf(i);
+}
+
+
+Line 31: variable : ID
+
+k
+
+Line 31: factor : CONST_INT
+
+0
+
+Line 31: unary_expression : factor
+
+0
+
+Line 31: term : unary_expression
+
+0
+
+Line 31: simple_expression : term
+
+0
+
+Line 31: rel_expression : simple_expression
+
+0
+
+Line 31: logic_expression : rel_expression
+
+0
+
+Line 31: expression : variable ASSIGNOP logic_expression
+
+k=0
+
+Line 31: expression_statement : expression SEMICOLON
+
+k=0;
+
+Line 31: statement : expression_statement
+
+k=0;
+
+Line 31: statements : statement
+
+k=0;
+
+Line 32: statement : PRINTLN LPAREN ID RPAREN SEMICOLON
+
+printf(k);
+
+Line 32: statements : statements statement
+
+k=0;
+printf(k);
+
+Line 33: compound_statement : LCURL statements RCURL
+
+{
+k=0;
 printf(k);
 }
 
 
-Line 19: statement : IF LPAREN expression RPAREN statement ELSE statement
+ScopeTable# 1.1.4
 
-if (j<8){
+ScopeTable# 1.1
+0 --> <i : ID> 
+1 --> <j : ID> 
+2 --> <k : ID> 
+
+ScopeTable# 1
+6 --> <main : ID> 
+
+Line 33: statement : compound_statement
+
+{
+k=0;
+printf(k);
+}
+
+
+Line 33: statement : IF LPAREN expression RPAREN statement ELSE statement
+
+if (i<5){
 printf(i);
 }
 else
 {
+k=0;
 printf(k);
 }
 
 
-Line 19: statements : statements statement
+Line 33: statement : IF LPAREN expression RPAREN statement ELSE statement
+
+if (j>8){
+printf(j);
+}
+else
+if (i<5){
+printf(i);
+}
+else
+{
+k=0;
+printf(k);
+}
+
+
+Line 33: statement : IF LPAREN expression RPAREN statement ELSE statement
+
+if (k==6){
+printf(k);
+}
+else
+if (j>8){
+printf(j);
+}
+else
+if (i<5){
+printf(i);
+}
+else
+{
+k=0;
+printf(k);
+}
+
+
+Line 33: statements : statements statement
 
 int i,j,k;
 i=3;
 j=8;
 k=6;
-if (i==3){
+if (k==6){
+printf(k);
+}
+else
+if (j>8){
 printf(j);
 }
-
-if (j<8){
+else
+if (i<5){
 printf(i);
 }
 else
 {
+k=0;
 printf(k);
 }
 
@@ -446,15 +597,20 @@ int i,j,k;
 i=3;
 j=8;
 k=6;
-if (i==3){
+if (k==6){
+printf(k);
+}
+else
+if (j>8){
 printf(j);
 }
-
-if (j<8){
+else
+if (i<5){
 printf(i);
 }
 else
 {
+k=0;
 printf(k);
 }
 
@@ -467,15 +623,20 @@ int i,j,k;
 i=3;
 j=8;
 k=6;
-if (i==3){
+if (k==6){
+printf(k);
+}
+else
+if (j>8){
 printf(j);
 }
-
-if (j<8){
+else
+if (i<5){
 printf(i);
 }
 else
 {
+k=0;
 printf(k);
 }
 
@@ -498,15 +659,20 @@ int i,j,k;
 i=3;
 j=8;
 k=6;
-if (i==3){
+if (k==6){
+printf(k);
+}
+else
+if (j>8){
 printf(j);
 }
-
-if (j<8){
+else
+if (i<5){
 printf(i);
 }
 else
 {
+k=0;
 printf(k);
 }
 
@@ -521,15 +687,20 @@ int i,j,k;
 i=3;
 j=8;
 k=6;
-if (i==3){
+if (k==6){
+printf(k);
+}
+else
+if (j>8){
 printf(j);
 }
-
-if (j<8){
+else
+if (i<5){
 printf(i);
 }
 else
 {
+k=0;
 printf(k);
 }
 
@@ -545,15 +716,20 @@ int i,j,k;
 i=3;
 j=8;
 k=6;
-if (i==3){
+if (k==6){
+printf(k);
+}
+else
+if (j>8){
 printf(j);
 }
-
-if (j<8){
+else
+if (i<5){
 printf(i);
 }
 else
 {
+k=0;
 printf(k);
 }
 
