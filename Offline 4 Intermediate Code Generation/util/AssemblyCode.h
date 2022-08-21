@@ -142,5 +142,9 @@ string newLabel() {
     return "label_" + to_string(numberOfLabel);
 }
 
+string newTemp(string variableName) {
+    return "temp_" + variableName;
+}
+
 #endif
 

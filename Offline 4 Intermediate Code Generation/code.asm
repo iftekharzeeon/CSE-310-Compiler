@@ -10,10 +10,15 @@
 	a_1 DW ?
 	b_2 DW ?
 	c_3 DW ?
-	i_4 DW ?
-	j_5 DW ?
-	k_6 DW ?
-	l_7 DW ?
+	temp_a DW ?
+
+	c_4 DW ?
+	temp_b DW ?
+
+	i_5 DW ?
+	j_6 DW ?
+	k_7 DW ?
+	l_8 DW ?
 
 .CODE
 MAIN PROC
@@ -24,16 +29,86 @@ MAIN PROC
 
 	PUSH 5
 	;i = 5
-	POP CX
-	MOV i_4, CX
+	POP BX
+	MOV i_5, BX
 	PUSH 6
 	;j = 6
-	POP CX
-	MOV j_5, CX
+	POP BX
+	MOV j_6, BX
 	;Call Proc func_a
 	CALL FUNC_A
 	;println(a)
 	MOV CX, a_1
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+	;Call Proc foo
+	PUSH i_5
+	POP temp_a
+	CALL FOO
+	;k = foo(i)
+	POP BX
+	MOV k_7, BX
+	;println(k)
+	MOV CX, k_7
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+	;Call Proc bar
+	PUSH i_5
+	PUSH j_6
+	POP temp_b
+	POP temp_a
+	CALL BAR
+	;l = bar(i,j)
+	POP BX
+	MOV l_8, BX
+	;println(l)
+	MOV CX, l_8
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+	PUSH 6
+	;Call Proc bar
+	PUSH i_5
+	PUSH j_6
+	POP temp_b
+	POP temp_a
+	CALL BAR
+	;6*bar(i,j)
+	POP AX
+	POP BX
+	MUL BX
+	PUSH AX
+	PUSH 2
+	;6*bar(i,j)+2
+	POP BX
+	POP AX
+	ADD AX, BX
+	PUSH AX
+	PUSH 3
+	;Call Proc foo
+	PUSH i_5
+	POP temp_a
+	CALL FOO
+	;3*foo(i)
+	POP AX
+	POP BX
+	MUL BX
+	PUSH AX
+	;6*bar(i,j)+2-3*foo(i)
+	POP BX
+	POP AX
+	SUB AX, BX
+	PUSH AX
+	;j = 6*bar(i,j)+2-3*foo(i)
+	POP BX
+	MOV j_6, BX
+	;println(j)
+	MOV CX, j_6
 	MOV VAR_TO_PRINT, CX
 	CALL NEW_LINE
 	CALL PRINT_VAR
@@ -116,15 +191,66 @@ NEW_LINE PROC
 	NEW_LINE ENDP
 
 
-FUNC_A PROC
+FUNC_A PROC NEAR
 
+	POP CX
 	PUSH 7
 	;a = 7
-	POP CX
-	MOV a_1, CX
+	POP BX
+	MOV a_1, BX
+	PUSH CX
 
 	RET
 
 FUNC_A ENDP
+
+FOO PROC NEAR
+
+	POP CX
+	PUSH 3
+	;a+3
+	MOV BX, temp_a
+	POP AX
+	ADD AX, BX
+	PUSH AX
+	;a = a+3
+	POP BX
+	MOV temp_a, BX
+	PUSH temp_a
+	PUSH CX
+
+	RET
+
+FOO ENDP
+
+BAR PROC NEAR
+
+	POP CX
+	PUSH 4
+	;4*a
+	POP AX
+	MOV BX, temp_a
+	MUL BX
+	PUSH AX
+	PUSH 2
+	;2*b
+	POP AX
+	MOV BX, temp_b
+	MUL BX
+	PUSH AX
+	;4*a+2*b
+	POP BX
+	POP AX
+	ADD AX, BX
+	PUSH AX
+	;c = 4*a+2*b
+	POP BX
+	MOV c_4, BX
+	PUSH c_4
+	PUSH CX
+
+	RET
+
+BAR ENDP
 
 END MAIN

@@ -25,6 +25,7 @@ private:
     string asmCode;
 
     vector<string> parametersList;
+    vector<SymbolInfo*> paramList;
 
 
 public:
@@ -141,8 +142,16 @@ public:
         this->parametersList.push_back(type);
     }
 
+    void addParams(SymbolInfo* param) {
+        this->paramList.push_back(param);
+    }
+
     vector<string> getParamList() {
         return this->parametersList;
+    }
+
+    vector<SymbolInfo*> getParamArgList() {
+        return this->paramList;
     }
 
     string getAsmName() {

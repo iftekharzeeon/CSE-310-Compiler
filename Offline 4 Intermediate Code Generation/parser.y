@@ -29,6 +29,7 @@ FILE *asmCodeFileProc;
 
 vector<SymbolInfo*> parametersList;
 vector<SymbolInfo*> argumentList;
+vector<string> temporaryVariablesAsmList;
 
 string typeName = "";
 string asmCode = "";
@@ -162,6 +163,8 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON {
 				;
 		 
 func_definition : type_specifier ID LPAREN parameter_list RPAREN {
+			asmCode = "";
+
 			SymbolInfo *symbolInfo = symbolTable->lookUp($2->getName());
 			if (symbolInfo == nullptr) {
 				symbolTable->insert($2->getName(), $2->getType());
@@ -205,10 +208,29 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 			int i = 0;
 			while (i != paramListSize) {
 				SymbolInfo *s1 = parametersList.at(i);
-				symbolTable->lookUp($2->getName())->addParameters(s1->getType());
+				SymbolInfo *t = symbolTable->lookUp($2->getName());
+				t->addParameters(s1->getType());
+				t->addParams(s1);
 				i++;
 				
 			}
+
+			asmCode = $4->getAsmCode();
+
+			printToDataAsmFile(asmCodeFileData, asmCode);
+
+			asmCode = "";
+			string functionName = $2->getName();
+			transform(functionName.begin(), functionName.end(), functionName.begin(), ::toupper);
+
+			asmCode += functionName + " PROC NEAR\n\n";
+			asmCode += "\tPOP CX\n";
+			asmCode += $7->getAsmCode();
+			asmCode += "\tPUSH CX\n";
+			asmCode += "\n\tRET\n\n"
+						"" + functionName + " ENDP\n";
+			
+			printToProcAsmFile(asmCodeFileProc, asmCode);
 
 			parametersList.clear();
 			
@@ -246,8 +268,10 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 				string functionName = $2->getName();
 				transform(functionName.begin(), functionName.end(), functionName.begin(), ::toupper);
 
-				asmCode += functionName + " PROC\n\n";
+				asmCode += functionName + " PROC NEAR\n\n";
+				asmCode += "\tPOP CX\n";
 				asmCode += $6->getAsmCode();
+				asmCode += "\tPUSH CX\n";
 				asmCode += "\n\tRET\n\n"
 							"" + functionName + " ENDP\n";
 				
@@ -260,6 +284,10 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 
 
 parameter_list  : parameter_list COMMA type_specifier ID {
+					asmCode = "";
+
+					asmCode += $1->getAsmCode();
+
 					logFileText += "Line " + to_string(lineCount) + ": parameter_list : parameter_list COMMA type_specifier ID\n\n";
 					
 
@@ -277,7 +305,21 @@ parameter_list  : parameter_list COMMA type_specifier ID {
 					$$ = $1;
 					$$->setName($1->getName() + "," + $3->getName() + " " + $4->getName());
 
+					//AssemblyCode
+					string temporaryVariableName = "temp_" + s1->getName();
+
+					if ( std::find(temporaryVariablesAsmList.begin(), temporaryVariablesAsmList.end(), temporaryVariableName) != temporaryVariablesAsmList.end() ) {
+						s1->setAsmName(temporaryVariableName);
+					} else {
+						temporaryVariablesAsmList.push_back(temporaryVariableName);
+						s1->setAsmName(temporaryVariableName);
+						asmCode += "\t" + temporaryVariableName + " DW ?\n";	
+					}
+
+					$$->setAsmCode(asmCode);
+
 					parametersList.push_back(s1);
+
 
 				}
 				| parameter_list COMMA type_specifier {
@@ -299,6 +341,8 @@ parameter_list  : parameter_list COMMA type_specifier ID {
 					parametersList.push_back(s1);
 				}
 				| type_specifier ID {
+					asmCode = "";
+
 					logFileText += "Line " + to_string(lineCount) + ": parameter_list : type_specifier ID\n\n";
 
 					SymbolInfo *s1 = new SymbolInfo($2->getName(), $1->getName());
@@ -314,7 +358,21 @@ parameter_list  : parameter_list COMMA type_specifier ID {
 					logFileText += $1->getName() + " " + $2->getName() + "\n\n";
 					$$ = new SymbolInfo($1->getName() + " " + $2->getName(), "PARAM_LIST");
 
+					//AssemblyCode
+					string temporaryVariableName = "temp_" + s1->getName();
+
+					if ( std::find(temporaryVariablesAsmList.begin(), temporaryVariablesAsmList.end(), temporaryVariableName) != temporaryVariablesAsmList.end() ) {
+						s1->setAsmName(temporaryVariableName);
+					} else {
+						temporaryVariablesAsmList.push_back(temporaryVariableName);
+						s1->setAsmName(temporaryVariableName);
+						asmCode += "\t" + temporaryVariableName + " DW ?\n";
+					}
+
+					$$->setAsmCode(asmCode);
+
 					parametersList.push_back(s1);
+
 				}
 				| type_specifier {
 					logFileText += "Line " + to_string(lineCount) + ": parameter_list : type_specifier\n\n";
@@ -371,6 +429,10 @@ compound_statement : LCURL {
 						}
 					}
 					statements RCURL {
+					asmCode = "";
+					
+					asmCode += $3->getAsmCode();
+
 					logFileText += "Line " + to_string(lineCount) + ": compound_statement : LCURL statements RCURL\n\n" + "{\n" + $3->getName() + "\n}\n\n\n";
 					
 					logFileText += symbolTable->printAllScopeTable();
@@ -379,6 +441,8 @@ compound_statement : LCURL {
 					
 					$$ = $3;
 					$$->setName("{\n" + $3->getName() + "\n}\n");
+					$$->setAsmCode(asmCode);
+
 					
 				}
 				| LCURL {
@@ -700,9 +764,20 @@ statement : var_declaration {
 
 		}
 		| RETURN expression SEMICOLON {
+			asmCode = "";
+
+			asmCode += $2->getAsmCode();
+
 			logFileText += "Line " + to_string(lineCount) + ": statement : RETURN expression SEMICOLON\n\n" + "return " + $2->getName() + ";\n\n";
 			$$ = $2;
 			$$->setName("return " + $2->getName() + ";");
+
+			//AssemblyCode
+			if ($2->getAsmName() != "") {
+				asmCode += "\tPUSH " + $2->getAsmName() + "\n";
+			}
+
+			$$->setAsmCode(asmCode);
 		}
 		;
 	  
@@ -725,13 +800,16 @@ variable : ID {
 			logFileText += "Line " + to_string(lineCount) + ": variable : ID\n\n";
 
 			SymbolInfo *tempSymbolInfo = symbolTable->lookUp($1->getName());
-			
+
 			if (tempSymbolInfo == nullptr) {
 				errorCount++;
 				logFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $1->getName() + "\n\n";
 				errorFileText += "Error at line " + to_string(lineCount) + ": Undeclared variable " + $1->getName() + "\n\n";
 
 			} else {
+				if (tempSymbolInfo->getAsmName() == "") {
+					tempSymbolInfo->setAsmName("temp_" + tempSymbolInfo->getName());
+				} 
 				variableNameForAsm = tempSymbolInfo->getAsmName();
 				int variableType = tempSymbolInfo->getVarType();
 				// cout << tempSymbolInfo->getName() << tempSymbolInfo->getVarType() << endl;
@@ -744,7 +822,7 @@ variable : ID {
 			}
 
 			logFileText += $1->getName() + "\n\n";
-			
+
 			//AssemblyCode
 			$$ = $1;
 			$$->setAsmName(variableNameForAsm);
@@ -832,6 +910,8 @@ expression : logic_expression {
 							logFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch\n\n";
 							errorFileText += "Error at line " + to_string(lineCount) + ": Type Mismatch\n\n";
 						}
+
+
 					} else if ($3->getType() == "LOGIC_EXPRESSION" || $3->getType() == "RELOP_EXPRESSION") {
 						if (tempSymbolInfo->getDatType() != "int") {
 							cout << tempSymbolInfo->getDatType() << endl;
@@ -849,8 +929,8 @@ expression : logic_expression {
 
 				//AssemblyCode
 				asmCode += "\t;" + $1->getName() + " = " + $3->getName() + "\n"
-						"\tPOP CX\n"
-						"\tMOV " + $1->getAsmName() + ", CX\n";
+						"\tPOP BX\n"
+						"\tMOV " + $1->getAsmName() + ", BX\n";
 				
 				//printToCodeAsmFile(asmCodeFileCode, asmCode);
 				$$->setAsmCode(asmCode);
@@ -1163,6 +1243,12 @@ factor	: variable {
 		| ID LPAREN argument_list RPAREN {
 			asmCode = "";
 
+			string procName = $1->getName();
+			asmCode += "\t;Call Proc " + procName + "\n";
+			asmCode += $3->getAsmCode();
+
+			int argumentLength = 0;
+
 			logFileText += "Line " + to_string(lineCount) + ": factor : ID LPAREN argument_list RPAREN\n\n";
 
 			SymbolInfo *s1 = symbolTable->lookUp($1->getName());
@@ -1177,18 +1263,26 @@ factor	: variable {
 					errorFileText += "Error at line " + to_string(lineCount) + ": " +  $1->getName() + " is not a function " + "\n\n";
 				} else {
 					vector<string> pList = s1->getParamList();
+					vector<SymbolInfo*> pListForAsm = s1->getParamArgList();
+
 					int pListSize = pList.size();
+
 					int i = 0;
 					if (pListSize != argumentList.size()) {
 						errorCount++;
 						logFileText += "Error at line " + to_string(lineCount) + ": Total number of arguments mismatch in function " + $1->getName() + "\n\n";
 						errorFileText += "Error at line " + to_string(lineCount) + ": Total number of arguments mismatch in function " + $1->getName() + "\n\n";
 					} else {
+						string asmNamesForArgs[pListSize];
+						argumentLength = pListSize;
+
 						while(i != pListSize) {
 							
 							string variableName = argumentList.at(i)->getName();
 							string variableType = argumentList.at(i)->getType();
 							string argumentType = pList.at(i);
+
+							asmNamesForArgs[i] = pListForAsm.at(i)->getAsmName();
 
 							if (variableType == "CONST_INT" || "CONST_FLOAT") {
 								if (variableType == "CONST_INT" && argumentType != "int") {
@@ -1220,6 +1314,11 @@ factor	: variable {
 							// cout << argumentList.at(i)->getName() + " " << argumentList.at(i)->getType() + " " << pList.at(i) << endl;
 							i++;
 						}
+
+						//AssemblyCode
+						for (int k = argumentLength-1; k>=0; k--) {
+							asmCode += "\tPOP " + asmNamesForArgs[k] + "\n";
+						}
 					}
 				}	
 			}
@@ -1229,8 +1328,9 @@ factor	: variable {
 			$$ = new SymbolInfo($1->getName() + "(" + $3->getName() + ")", "FUNCTION");
 
 			//AssemblyCode
-			string procName = $1->getName();
-			asmCode = "\t;Call Proc " + procName + "\n";
+			// cout << $3->getAsmCode() << endl;
+			// cout << $3->getAsmName() << endl;
+
 			transform(procName.begin(), procName.end(), procName.begin(), ::toupper);
 
 			asmCode += "\tCALL " + procName + "\n";
@@ -1304,18 +1404,37 @@ argument_list : arguments {
 			;
 	
 arguments : arguments COMMA logic_expression {
+			asmCode = "";
+
+			asmCode += $1->getAsmCode();
+
 			logFileText += "Line " + to_string(lineCount) + ": arguments : arguments COMMA logic_expression\n\n" + $1->getName() + "," + $3->getName() + "\n\n";
 			$$ = $1;
 			$$->setName($1->getName() + "," + $3->getName());
 			SymbolInfo *tempSymbolInfo = new SymbolInfo($3->getName(), $3->getType());
 			argumentList.push_back(tempSymbolInfo);
+
+			//AssemblyCode
+			if ($3->getAsmName() != "") {
+				asmCode += "\tPUSH " + $3->getAsmName() + "\n";
+			}
+			$$->setAsmCode(asmCode);
+
 		}
 	    | logic_expression {
+			asmCode = "";
+
 			logFileText += "Line " + to_string(lineCount) + ": arguments : logic_expression\n\n" + $1->getName() + "\n\n";
 			$$ = $1;
 			
 			SymbolInfo *tempSymbolInfo = new SymbolInfo($1->getName(), $1->getType());
 			argumentList.push_back(tempSymbolInfo);
+
+			//AssemblyCode
+			if ($1->getAsmName() != "") {
+				asmCode += "\tPUSH " + $1->getAsmName() + "\n";
+			}
+			$$->setAsmCode(asmCode);
 		}
 	    ;
  
