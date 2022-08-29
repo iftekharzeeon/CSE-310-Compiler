@@ -77,6 +77,7 @@ string codeSegmentEnd = "\t;EXIT PROGRAM\n"
                         "\tMAIN ENDP\n";
 
 int numberOfLabel = 0;
+int numberOfTemp = 0;
 
 
 
@@ -143,7 +144,8 @@ string newLabel() {
 }
 
 string newTemp(string variableName) {
-    return "temp_" + variableName;
+    numberOfTemp++;
+    return "temp_" + variableName + to_string(numberOfTemp);
 }
 
 #endif

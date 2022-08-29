@@ -224,9 +224,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 			transform(functionName.begin(), functionName.end(), functionName.begin(), ::toupper);
 
 			asmCode += functionName + " PROC NEAR\n\n";
-			asmCode += "\tPOP CX\n";
 			asmCode += $7->getAsmCode();
-			asmCode += "\tPUSH CX\n";
 			asmCode += "\n\tRET\n\n"
 						"" + functionName + " ENDP\n";
 			
@@ -269,9 +267,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 				transform(functionName.begin(), functionName.end(), functionName.begin(), ::toupper);
 
 				asmCode += functionName + " PROC NEAR\n\n";
-				asmCode += "\tPOP CX\n";
 				asmCode += $6->getAsmCode();
-				asmCode += "\tPUSH CX\n";
 				asmCode += "\n\tRET\n\n"
 							"" + functionName + " ENDP\n";
 				
@@ -766,16 +762,17 @@ statement : var_declaration {
 		| RETURN expression SEMICOLON {
 			asmCode = "";
 
-			asmCode += $2->getAsmCode();
-
 			logFileText += "Line " + to_string(lineCount) + ": statement : RETURN expression SEMICOLON\n\n" + "return " + $2->getName() + ";\n\n";
 			$$ = $2;
 			$$->setName("return " + $2->getName() + ";");
 
 			//AssemblyCode
+			asmCode += "\tPOP BP\n";
+			asmCode += $2->getAsmCode();
 			if ($2->getAsmName() != "") {
 				asmCode += "\tPUSH " + $2->getAsmName() + "\n";
 			}
+			asmCode += "\tPUSH BP\n";
 
 			$$->setAsmCode(asmCode);
 		}

@@ -7,18 +7,16 @@
 	VAR_TO_PRINT DW ?
 	COUNT DW ?
 
-	a_1 DW ?
-	b_2 DW ?
-	c_3 DW ?
+	k_1 DW ?
 	temp_a DW ?
 
-	c_4 DW ?
+	x_2 DW ?
+	i_3 DW ?
 	temp_b DW ?
 
-	i_5 DW ?
-	j_6 DW ?
-	k_7 DW ?
-	l_8 DW ?
+	a_4 DW ?
+	b_5 DW ?
+	i_6 DW ?
 
 .CODE
 MAIN PROC
@@ -27,93 +25,116 @@ MAIN PROC
 	MOV DS, AX
 
 
-	PUSH 5
-	;i = 5
+	PUSH 1
+	;a = 1
 	POP BX
-	MOV i_5, BX
-	PUSH 6
-	;j = 6
-	POP BX
-	MOV j_6, BX
-	;Call Proc func_a
-	CALL FUNC_A
-	;println(a)
-	MOV CX, a_1
-	MOV VAR_TO_PRINT, CX
-	CALL NEW_LINE
-	CALL PRINT_VAR
-	CALL NEW_LINE
-	;Call Proc foo
-	PUSH i_5
-	POP temp_a
-	CALL FOO
-	;k = foo(i)
-	POP BX
-	MOV k_7, BX
-	;println(k)
-	MOV CX, k_7
-	MOV VAR_TO_PRINT, CX
-	CALL NEW_LINE
-	CALL PRINT_VAR
-	CALL NEW_LINE
-	;Call Proc bar
-	PUSH i_5
-	PUSH j_6
-	POP temp_b
-	POP temp_a
-	CALL BAR
-	;l = bar(i,j)
-	POP BX
-	MOV l_8, BX
-	;println(l)
-	MOV CX, l_8
-	MOV VAR_TO_PRINT, CX
-	CALL NEW_LINE
-	CALL PRINT_VAR
-	CALL NEW_LINE
-	PUSH 6
-	;Call Proc bar
-	PUSH i_5
-	PUSH j_6
-	POP temp_b
-	POP temp_a
-	CALL BAR
-	;6*bar(i,j)
-	POP AX
-	POP BX
-	MUL BX
-	PUSH AX
+	MOV a_4, BX
 	PUSH 2
-	;6*bar(i,j)+2
+	;b = 2
 	POP BX
-	POP AX
-	ADD AX, BX
-	PUSH AX
-	PUSH 3
-	;Call Proc foo
-	PUSH i_5
+	MOV b_5, BX
+	;Call Proc g
+	PUSH a_4
+	PUSH b_5
+	POP temp_b
 	POP temp_a
-	CALL FOO
-	;3*foo(i)
-	POP AX
+	CALL G
+	;a = g(a,b)
 	POP BX
-	MUL BX
-	PUSH AX
-	;6*bar(i,j)+2-3*foo(i)
-	POP BX
-	POP AX
-	SUB AX, BX
-	PUSH AX
-	;j = 6*bar(i,j)+2-3*foo(i)
-	POP BX
-	MOV j_6, BX
-	;println(j)
-	MOV CX, j_6
+	MOV a_4, BX
+	;println(a)
+	MOV CX, a_4
 	MOV VAR_TO_PRINT, CX
 	CALL NEW_LINE
 	CALL PRINT_VAR
 	CALL NEW_LINE
+	;for(i=0;i<4;i++)
 	PUSH 0
+	;i = 0
+	POP BX
+	MOV i_6, BX
+label_23:
+	PUSH 4
+	;Check i < 4
+	MOV AX, i_6
+	POP BX
+	CMP AX, BX
+	JL label_16
+	PUSH 0
+	JMP label_17
+
+label_16:
+	PUSH 1
+
+label_17:
+
+	POP AX
+	CMP AX, 1
+	JGE label_24
+	JMP label_25
+label_24:
+	PUSH 3
+	;a = 3
+	POP BX
+	MOV a_4, BX
+label_20:
+	PUSH 0
+	;Check a > 0
+	MOV AX, a_4
+	POP BX
+	CMP AX, BX
+	JG label_18
+	PUSH 0
+	JMP label_19
+
+label_18:
+	PUSH 1
+
+label_19:
+
+	POP AX
+	CMP AX, 1
+	JGE label_21
+	JMP label_22
+label_21:
+	;b++
+	MOV AX, b_5
+	ADD AX, 1
+	MOV b_5, AX
+	;a--
+	MOV AX, a_4
+	SUB AX, 1
+	MOV a_4, AX
+	PUSH AX
+	JMP label_20
+label_22:
+	;i++
+	MOV AX, i_6
+	ADD AX, 1
+	MOV i_6, AX
+	JMP label_23
+label_25:
+	;println(a)
+	MOV CX, a_4
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+	;println(b)
+	MOV CX, b_5
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+	;println(i)
+	MOV CX, i_6
+	MOV VAR_TO_PRINT, CX
+	CALL NEW_LINE
+	CALL PRINT_VAR
+	CALL NEW_LINE
+	POP BP
+	PUSH 0
+	PUSH BP
 
 	;EXIT PROGRAM
 	MOV AH, 4CH
@@ -191,66 +212,168 @@ NEW_LINE PROC
 	NEW_LINE ENDP
 
 
-FUNC_A PROC NEAR
+F PROC NEAR
 
-	POP CX
-	PUSH 7
-	;a = 7
+	PUSH 5
+	;k = 5
 	POP BX
-	MOV a_1, BX
-	PUSH CX
+	MOV k_1, BX
+label_3:
+	PUSH 0
+	;Check k > 0
+	MOV AX, k_1
+	POP BX
+	CMP AX, BX
+	JG label_1
+	PUSH 0
+	JMP label_2
 
-	RET
+label_1:
+	PUSH 1
 
-FUNC_A ENDP
+label_2:
 
-FOO PROC NEAR
-
-	POP CX
+	POP AX
+	CMP AX, 1
+	JGE label_4
+	JMP label_5
+label_4:
+	;a++
+	MOV AX, temp_a
+	ADD AX, 1
+	MOV temp_a, AX
+	;k--
+	MOV AX, k_1
+	SUB AX, 1
+	MOV k_1, AX
+	PUSH AX
+	JMP label_3
+label_5:
+	POP BP
 	PUSH 3
-	;a+3
-	MOV BX, temp_a
+	;3*a
 	POP AX
-	ADD AX, BX
+	MOV BX, temp_a
+	MUL BX
 	PUSH AX
-	;a = a+3
+	PUSH 7
+	;3*a-7
 	POP BX
-	MOV temp_a, BX
+	POP AX
+	SUB AX, BX
+	PUSH AX
+	PUSH BP
+
+	RET
+
+F ENDP
+
+G PROC NEAR
+
+	;Call Proc f
 	PUSH temp_a
-	PUSH CX
-
-	RET
-
-FOO ENDP
-
-BAR PROC NEAR
-
-	POP CX
-	PUSH 4
-	;4*a
-	POP AX
-	MOV BX, temp_a
-	MUL BX
-	PUSH AX
-	PUSH 2
-	;2*b
-	POP AX
-	MOV BX, temp_b
-	MUL BX
-	PUSH AX
-	;4*a+2*b
+	POP temp_a
+	CALL F
+	;f(a)+a
 	POP BX
+	MOV AX, temp_a
+	ADD AX, BX
+	PUSH AX
+	;f(a)+a+b
+	POP BX
+	MOV AX, temp_b
+	ADD AX, BX
+	PUSH AX
+	;x = f(a)+a+b
+	POP BX
+	MOV x_2, BX
+	;for(i=0;i<7;i++)
+	PUSH 0
+	;i = 0
+	POP BX
+	MOV i_3, BX
+label_13:
+	PUSH 7
+	;Check i < 7
+	MOV AX, i_3
+	POP BX
+	CMP AX, BX
+	JL label_6
+	PUSH 0
+	JMP label_7
+
+label_6:
+	PUSH 1
+
+label_7:
+
+	POP AX
+	CMP AX, 1
+	JGE label_14
+	JMP label_15
+label_14:
+	PUSH 3
+	;i%3
+	MOV AX, i_3
+	POP BX
+	MOV DX, 0
+	DIV BX
+	PUSH DX
+	PUSH 0
+	;Check i%3 == 0
+	POP AX
+	POP BX
+	CMP AX, BX
+	JE label_8
+	PUSH 0
+	JMP label_9
+
+label_8:
+	PUSH 1
+
+label_9:
+
+	;if (i%3==0) else
+	POP AX
+	CMP AX, 1
+	JNE label_10
+	PUSH 5
+	;x+5
+	MOV BX, x_2
 	POP AX
 	ADD AX, BX
 	PUSH AX
-	;c = 4*a+2*b
+	;x = x+5
 	POP BX
-	MOV c_4, BX
-	PUSH c_4
-	PUSH CX
+	MOV x_2, BX
+
+	JMP label_12
+
+label_10:
+	PUSH 1
+	;x-1
+	MOV BX, x_2
+	POP AX
+	SUB AX, BX
+	PUSH AX
+	;x = x-1
+	POP BX
+	MOV x_2, BX
+
+
+label_12:
+	;i++
+	MOV AX, i_3
+	ADD AX, 1
+	MOV i_3, AX
+	JMP label_13
+label_15:
+	POP BP
+	PUSH x_2
+	PUSH BP
 
 	RET
 
-BAR ENDP
+G ENDP
 
 END MAIN

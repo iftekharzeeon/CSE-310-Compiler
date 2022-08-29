@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 int f(int a){
 	int k;
 	k = 5;
@@ -31,7 +33,7 @@ int main(){
     a=1;
     b=2;
     a=g(a,b);
-    println(a);
+    printf("%d\n",a);
     for(i=0;i<4;i++){
         a=3;
         while(a>0){
@@ -39,8 +41,8 @@ int main(){
             a--;
         }
     }
-    println(a);
-    println(b);
-    println( i);
+    printf("%d\n",a);
+    printf("%d\n",b);
+    printf("%d\n", i);
     return 0;
 }
